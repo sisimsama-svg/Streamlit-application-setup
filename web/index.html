@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>نظارات مسلم | MOSLEM</title>
+  <meta name="description" content="متجر نظارات مسلم في باب اللوق. نظارات طبية وشمسية، تجربة حية على الوجه، وتوصيل لكل المحافظات.">
+  <meta name="theme-color" content="#111111">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip" href="#view">تخطَّ إلى المحتوى</a>
+  <div class="sticky-top">
+    <div class="announce">توصيل من باب اللوق إلى كل المحافظات</div>
+    <header class="header">
+      <nav class="links" aria-label="روابط المتجر">
+        <a href="#/tryon">التجربة الحية</a>
+        <a href="#/track">تتبّع الطلب</a>
+        <a href="#/contact">تواصل معنا</a>
+      </nav>
+      <a class="brand" href="#/">
+        <span class="brand-mark">MOSLEM</span>
+        <span class="brand-ar">نظارات مسلم</span>
+      </a>
+      <div class="tools">
+        <button type="button" class="icon-btn" id="open-search" aria-label="بحث">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 16.5 20 20.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+        <a class="icon-btn" href="#/tryon" aria-label="التجربة الحية">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="8" width="8" height="6.5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="8" width="8" height="6.5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 11.2h4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        </a>
+        <a class="icon-btn cart-link" href="#/cart" aria-label="السلة">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.2 7.2h14.2l-1.3 8.1a1 1 0 0 1-1 .8H8.6a1 1 0 0 1-1-.8L6.2 7.2Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6.2 7.2 5.2 4.2H2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="19.6" r="1.15" fill="currentColor"/><circle cx="17.2" cy="19.6" r="1.15" fill="currentColor"/></svg>
+          <span id="cart-count" hidden>0</span>
+        </a>
+      </div>
+    </header>
+    <nav class="nav" aria-label="الأقسام">
+      <a href="#/shop?sale=1" data-nav="sale">تخفيضات</a>
+      <a href="#/shop?kind=شمسية" data-nav="sun">النظارات الشمسية</a>
+      <a href="#/shop?kind=طبية" data-nav="medical">النظارات الطبية</a>
+      <a href="#/shop?audience=أطفال" data-nav="kids">الأطفال</a>
+      <a href="#/tryon" data-nav="tryon">التجربة الحية</a>
+    </nav>
+  </div>
+  <main id="view" tabindex="-1">
+    <p class="loading">جاري فتح المتجر…</p>
+  </main>
+  <footer class="footer">
+    <div class="wrap footer-grid">
+      <div>
+        <p class="brand-mark footer-mark">MOSLEM</p>
+        <p>نظارات مسلم، محل واحد في باب اللوق. إطارات طبية وشمسية، وعدسات تُجهَّز على المقاس.</p>
+      </div>
+      <div>
+        <h3>تسوق</h3>
+        <a href="#/shop?kind=شمسية&audience=رجالي">شمسية رجالي</a>
+        <a href="#/shop?kind=شمسية&audience=حريمي">شمسية حريمي</a>
+        <a href="#/shop?kind=طبية">نظارات طبية</a>
+        <a href="#/shop?audience=أطفال">أطفال</a>
+        <a href="#/shop?sale=1">تخفيضات</a>
+      </div>
+      <div>
+        <h3>المحل</h3>
+        <a href="#/about">عن نظارات مسلم</a>
+        <a href="#/tryon">التجربة الحية</a>
+        <a href="#/contact">باب اللوق</a>
+        <a href="#/track">تتبّع الطلب</a>
+      </div>
+      <div>
+        <h3>المساعدة</h3>
+        <a href="#/shipping">الشحن والتوصيل</a>
+        <a href="#/returns">الاستبدال والإرجاع</a>
+        <a href="#/faq">الأسئلة الشائعة</a>
+        <a href="#/privacy">الخصوصية</a>
+        <a href="#/terms">الشروط</a>
+      </div>
+    </div>
+    <div class="legal">
+      <div class="wrap legal-row">
+        <span>© 2026 نظارات مسلم. جميع الحقوق محفوظة.</span>
+        <span>الدفع عند الاستلام · InstaPay · فودافون كاش</span>
+      </div>
+    </div>
+  </footer>
+  <dialog id="search" class="search" aria-label="بحث في التشكيلة">
+    <form class="search-bar" id="search-form">
+      <input id="q" type="search" placeholder="ابحث عن إطار، لون، أو ماركة" autocomplete="off" enterkeyhint="search">
+      <button type="button" id="close-search" aria-label="إغلاق">×</button>
+    </form>
+    <div id="search-results"></div>
+  </dialog>
+  <div id="toast" class="toast" hidden role="status"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
