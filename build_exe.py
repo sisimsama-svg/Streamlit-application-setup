@@ -55,6 +55,8 @@ linkColor = "#047857"
 
 MODULES = (
     "app.py",
+    "shop.py",
+    "pwa.py",
     "products.py",
     "tryon.py",
     "generate_assets.py",
@@ -99,6 +101,11 @@ def _stage() -> Path:
     SRC.mkdir(parents=True)
     for name in MODULES:
         shutil.copy2(ROOT / name, SRC / name)
+    for name in ("manifest.json", "service-worker.js"):
+        shutil.copy2(ROOT / name, SRC / name)
+    pwa_dir = ROOT / "pwa"
+    if pwa_dir.is_dir():
+        shutil.copytree(pwa_dir, SRC / "pwa")
     shutil.copytree(ROOT / "assets", SRC / "assets")
     (SRC / "data").mkdir()
     catalog = ROOT / "data" / "catalog.json"
@@ -176,6 +183,11 @@ for dist_name in (
 
 datas += [
     ("{src}/app.py", "."),
+    ("{src}/shop.py", "."),
+    ("{src}/pwa.py", "."),
+    ("{src}/manifest.json", "."),
+    ("{src}/service-worker.js", "."),
+    ("{src}/pwa", "pwa"),
     ("{src}/products.py", "."),
     ("{src}/tryon.py", "."),
     ("{src}/generate_assets.py", "."),

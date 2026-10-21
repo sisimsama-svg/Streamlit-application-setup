@@ -96,6 +96,7 @@ def main() -> None:
     from streamlit import config as _config
     from streamlit.runtime.credentials import check_credentials
     from streamlit.web import bootstrap
+    from streamlit.web.server.app_discovery import discover_asgi_app
 
     flag_options = {
         "global_developmentMode": False,
@@ -112,7 +113,11 @@ def main() -> None:
     _config._main_script_path = str(script)
     bootstrap.load_config_options(flag_options=flag_options)
     check_credentials()
-    bootstrap.run(str(script), False, [], flag_options)
+    discovered = discover_asgi_app(script)
+    if discovered.is_asgi_app and discovered.import_string:
+        bootstrap.run_asgi_app(str(script), discovered.import_string, [], flag_options)
+    else:
+        bootstrap.run(str(script), False, [], flag_options)
 
 
 if __name__ == "__main__":

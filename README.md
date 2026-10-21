@@ -43,7 +43,7 @@ set MOSLEM_DATA_DIR=D:\moslem-data
 2. إن لم يُعرف الأمر `git` فثبّت Git for Windows ثم أعد فتح الطرفية. من مجلد المشروع: `git init` ثم `git branch -M main` إن لم يكن Git مهيأ.
 3. `.gitignore` يمنع رفع الطلبات والروشتات والإيصالات والشعارات و`data/vendors.json` و`data/admin.json` وملف exe. لا تحذف هذه الملفات من الجهاز.
 4. `git add .` ثم تأكد عبر `git status` أن ملفات العملاء غير ظاهرة، ثم commit و`git remote add origin` و`git push -u origin main`.
-5. من https://share.streamlit.io سجّل الدخول بـ GitHub، New app، الفرع `main`، الملف الرئيسي `app.py`. المنصة تثبّت `requirements.txt`.
+5. من https://share.streamlit.io سجّل الدخول بـ GitHub، New app، الفرع `main`، الملف الرئيسي `app.py` (لا تستخدم `shop.py`). المنصة تثبّت `requirements.txt`. `app.py` يقدّم المتجر كـ PWA: `manifest.json` و`service-worker.js` وأيقونة الشعار بلون `#059669`، فيظهر «أضف إلى الشاشة الرئيسية» من المتصفح.
 6. الرابط بعد النشر يكون على الشكل `https://اسم-تختاره.streamlit.app`.
 
 Render كبديل: خدمة ويب Python، وأمر التشغيل:
