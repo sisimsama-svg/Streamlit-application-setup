@@ -1,0 +1,14 @@
+[server]
+headless = true
+showEmailPrompt = false
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "light"
+primaryColor = "#059669"
+backgroundColor = "#f4faf6"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#2e3236"
+linkColor = "#047857"

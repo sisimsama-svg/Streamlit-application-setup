@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 220" role="img" aria-label="E3DE">
+  <g fill="none" stroke="#C9CDD2" stroke-width="26" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M78 62 H28"/>
+    <rect x="78" y="28" width="240" height="150" rx="36"/>
+    <path d="M318 104 H402"/>
+    <rect x="402" y="28" width="240" height="150" rx="36"/>
+    <path d="M642 62 H692"/>
+  </g>
+  <g fill="none" stroke="#EEF0F2" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="96" y="46" width="204" height="114" rx="28"/>
+    <rect x="420" y="46" width="204" height="114" rx="28"/>
+  </g>
+  <text x="360" y="132" text-anchor="middle" font-family="Baloo Bhaijaan 2, Cairo, Tahoma, sans-serif" font-size="96" font-weight="800" fill="#4A4E54">E3DE</text>
+</svg>

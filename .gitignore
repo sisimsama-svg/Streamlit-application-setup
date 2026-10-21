@@ -1,0 +1,46 @@
+# بيانات العملاء والأسرار. تبقى على الجهاز ولا تُرفع.
+data/orders.json
+data/rx/
+data/receipts/
+data/logos/
+data/covers/
+data/notifications.json
+data/admin.json
+data/vendors.json
+data/*secret*
+data/secrets.json
+
+# data/catalog.json يبقى متاحاً: كتالوج البذرة وليس بيانات عملاء.
+# assets/models/face_landmarker.task مطلوب لتجربة النظارة (حوالي 3.6 ميجا).
+# assets/moslem-logo.jpg و assets/moslem.ico يبقيان حتى يعمل الشعار والأيقونة.
+
+# أسرار Streamlit والمنصة
+.streamlit/secrets.toml
+.env
+.env.*
+*.pem
+
+# بايت كود بايثون
+__pycache__/
+*.py[cod]
+
+# بيئات افتراضية
+.venv/
+venv/
+env/
+
+# PyInstaller ومجلد البناء
+dist/
+build/
+*.exe
+*.spec
+MoslemOpticsBuild/
+*.log
+.write_probe
+
+# بقايا نظام التشغيل
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+desktop.ini

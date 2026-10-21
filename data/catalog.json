@@ -1,0 +1,346 @@
+{
+  "version": 3,
+  "products": [
+    {
+      "id": "classic-black",
+      "name": "مسلم كلاسيك أسود",
+      "brand": "نظارات مسلم",
+      "price": 890,
+      "old_price": 1100,
+      "category": "كلاسيك",
+      "kind": "طبية",
+      "audience": "رجالي",
+      "rating": 4.8,
+      "sold": 320,
+      "stock": 8,
+      "color": "أسود",
+      "description": "إطار طبي رجالي من تشكيلة المحل في باب اللوق. مستطيل خفيف يناسب الوجه الدائري والبيضاوي.",
+      "asset": "classic_black.png",
+      "face_shapes": [
+        "دائري",
+        "بيضاوي"
+      ],
+      "store_id": "moslem"
+    },
+    {
+      "id": "round-gold",
+      "name": "مسلم دائري ذهبي",
+      "brand": "نظارات مسلم",
+      "price": 980,
+      "old_price": 1200,
+      "category": "دائري",
+      "kind": "طبية",
+      "audience": "حريمي",
+      "rating": 4.7,
+      "sold": 210,
+      "stock": 8,
+      "color": "ذهبي",
+      "description": "إطار طبي حريمي دائري من المحل. المعدن الذهبي الرفيع يليّن الوجه المربع والمستطيل.",
+      "face_shapes": [
+        "مربع",
+        "مستطيل",
+        "قلب"
+      ],
+      "asset": "round_gold.png",
+      "store_id": "moslem"
+    },
+    {
+      "id": "aviator-silver",
+      "name": "أوكلي أفياتور",
+      "brand": "Oakley",
+      "price": 3450,
+      "old_price": 3900,
+      "category": "أفياتور",
+      "kind": "شمسية",
+      "audience": "رجالي",
+      "rating": 4.9,
+      "sold": 450,
+      "stock": 8,
+      "color": "فضي",
+      "description": "نظارة شمسية أفياتور من ركن أوكلي الظاهر في المحل. عدسة داكنة وإطار معدني.",
+      "face_shapes": [
+        "مربع",
+        "بيضاوي",
+        "مستطيل",
+        "قلب"
+      ],
+      "asset": "aviator_silver.png",
+      "store_id": "moslem"
+    },
+    {
+      "id": "cateye-rose",
+      "name": "مسلم كات آي",
+      "brand": "نظارات مسلم",
+      "price": 1150,
+      "old_price": 1400,
+      "category": "كات آي",
+      "kind": "طبية",
+      "audience": "حريمي",
+      "rating": 4.6,
+      "sold": 180,
+      "stock": 8,
+      "color": "وردي",
+      "description": "إطار طبي حريمي كات آي من تشكيلة باب اللوق. يرفع زاوية العين على الوجه الدائري والبيضاوي.",
+      "face_shapes": [
+        "دائري",
+        "بيضاوي"
+      ],
+      "asset": "cateye_rose.png",
+      "store_id": "moslem"
+    },
+    {
+      "id": "sport-navy",
+      "name": "أوكلي سبورت",
+      "brand": "Oakley",
+      "price": 2980,
+      "old_price": 3400,
+      "category": "رياضي",
+      "kind": "شمسية",
+      "audience": "رجالي",
+      "rating": 4.5,
+      "sold": 265,
+      "stock": 8,
+      "color": "كحلي",
+      "description": "نظارة شمسية رياضية من أوكلي بعدسة داكنة وإطار ملتف، كما في ركن الماركات بالمحل.",
+      "face_shapes": [
+        "بيضاوي",
+        "مستطيل"
+      ],
+      "asset": "sport_navy.png",
+      "store_id": "moslem"
+    },
+    {
+      "id": "square-tortoise",
+      "name": "بوليس تاورتوز",
+      "brand": "Police",
+      "price": 1890,
+      "old_price": 2250,
+      "category": "مربع",
+      "kind": "طبية",
+      "audience": "رجالي",
+      "rating": 4.8,
+      "sold": 140,
+      "stock": 8,
+      "color": "تاورتوز",
+      "description": "إطار طبي رجالي من بوليس بنقشة تاورتوز. يضيف تحديداً للوجه الدائري.",
+      "face_shapes": [
+        "دائري"
+      ],
+      "asset": "square_tortoise.png",
+      "store_id": "moslem"
+    },
+    {
+      "id": "oval-green",
+      "name": "مسلم بيضاوي",
+      "brand": "نظارات مسلم",
+      "price": 820,
+      "old_price": 990,
+      "category": "بيضاوي",
+      "kind": "طبية",
+      "audience": "حريمي",
+      "rating": 4.4,
+      "sold": 96,
+      "stock": 8,
+      "color": "زيتوني",
+      "description": "إطار طبي حريمي بيضاوي من المحل. يوازن الوجه المربع والمستطيل والقلب.",
+      "face_shapes": [
+        "مربع",
+        "مستطيل",
+        "قلب"
+      ],
+      "asset": "oval_green.png",
+      "store_id": "moslem"
+    },
+    {
+      "id": "clear-blue",
+      "name": "مسلم شفاف",
+      "brand": "نظارات مسلم",
+      "price": 720,
+      "old_price": 890,
+      "category": "شفاف",
+      "kind": "طبية",
+      "audience": "للجميع",
+      "rating": 4.3,
+      "sold": 390,
+      "stock": 8,
+      "color": "شفاف",
+      "description": "إطار طبي شفاف خفيف من تشكيلة المحل، مناسب للاستخدام اليومي على الوجه البيضاوي.",
+      "asset": "clear_blue.png",
+      "face_shapes": [
+        "بيضاوي"
+      ],
+      "store_id": "moslem"
+    },
+    {
+      "id": "browline-brown",
+      "name": "مسلم برولاين بني",
+      "brand": "نظارات مسلم",
+      "price": 1490,
+      "old_price": 1750,
+      "category": "كلاسيك",
+      "kind": "طبية",
+      "audience": "رجالي",
+      "rating": 4.7,
+      "sold": 88,
+      "stock": 5,
+      "color": "بني",
+      "description": "إطار طبي رجالي بحاجب علوي بني من المحل. يحدد الوجه الدائري والبيضاوي.",
+      "asset": "browline_brown.png",
+      "face_shapes": [
+        "دائري",
+        "بيضاوي"
+      ],
+      "store_id": "moslem"
+    },
+    {
+      "id": "wayfarer-black",
+      "name": "بوليس وايفارير",
+      "brand": "Police",
+      "price": 2650,
+      "old_price": 3100,
+      "category": "مربع",
+      "kind": "شمسية",
+      "audience": "رجالي",
+      "rating": 4.6,
+      "sold": 240,
+      "stock": 11,
+      "color": "أسود",
+      "description": "نظارة شمسية وايفارير من ركن بوليس في المحل. عدسة داكنة وإطار عريض للوجه الدائري.",
+      "asset": "wayfarer_black.png",
+      "face_shapes": [
+        "دائري"
+      ],
+      "store_id": "moslem"
+    },
+    {
+      "id": "kids-round-blue",
+      "name": "مسلم أطفال دائري",
+      "brand": "نظارات مسلم",
+      "price": 480,
+      "old_price": 590,
+      "category": "دائري",
+      "kind": "طبية",
+      "audience": "أطفال",
+      "rating": 4.8,
+      "sold": 150,
+      "stock": 14,
+      "color": "أزرق",
+      "description": "إطار طبي دائري للأطفال من المحل، مرن وخفيف ويناسب الوجه المربع والمستطيل.",
+      "asset": "kids_round_blue.png",
+      "face_shapes": [
+        "مربع",
+        "مستطيل",
+        "قلب"
+      ],
+      "store_id": "moslem"
+    },
+    {
+      "id": "kids-flex-pink",
+      "name": "مسلم أطفال مرن",
+      "brand": "نظارات مسلم",
+      "price": 450,
+      "old_price": 560,
+      "category": "بيضاوي",
+      "kind": "طبية",
+      "audience": "أطفال",
+      "rating": 4.7,
+      "sold": 130,
+      "stock": 14,
+      "color": "وردي",
+      "description": "إطار طبي وردي مرن للأطفال من تشكيلة باب اللوق، خفيف للاستخدام المدرسي.",
+      "asset": "kids_flex_pink.png",
+      "face_shapes": [
+        "مربع",
+        "مستطيل",
+        "قلب"
+      ],
+      "store_id": "moslem"
+    },
+    {
+      "id": "cateye-sun",
+      "name": "بوليس كات آي",
+      "brand": "Police",
+      "price": 2480,
+      "old_price": 2890,
+      "category": "كات آي",
+      "kind": "شمسية",
+      "audience": "حريمي",
+      "rating": 4.8,
+      "sold": 175,
+      "stock": 7,
+      "color": "تاورتوز",
+      "description": "نظارة شمسية حريمية كات آي من بوليس بعدسة بنية. ترفع الملامح على الوجه الدائري والبيضاوي.",
+      "asset": "cateye_sun.png",
+      "face_shapes": [
+        "دائري",
+        "بيضاوي"
+      ],
+      "store_id": "moslem"
+    },
+    {
+      "id": "round-sun-gold",
+      "name": "مسلم دائري شمسي",
+      "brand": "نظارات مسلم",
+      "price": 980,
+      "old_price": 1200,
+      "category": "دائري",
+      "kind": "شمسية",
+      "audience": "حريمي",
+      "rating": 4.5,
+      "sold": 200,
+      "stock": 9,
+      "color": "ذهبي",
+      "description": "نظارة شمسية دائرية من المحل بعدسة داكنة وإطار ذهبي. تنعّم الوجه المربع والمستطيل.",
+      "asset": "round_sun_gold.png",
+      "face_shapes": [
+        "مربع",
+        "مستطيل",
+        "قلب"
+      ],
+      "store_id": "moslem"
+    },
+    {
+      "id": "kids-sun-red",
+      "name": "مسلم أطفال شمسية",
+      "brand": "نظارات مسلم",
+      "price": 420,
+      "old_price": 520,
+      "category": "دائري",
+      "kind": "شمسية",
+      "audience": "أطفال",
+      "rating": 4.6,
+      "sold": 210,
+      "stock": 16,
+      "color": "أحمر",
+      "description": "نظارة شمسية صغيرة للأطفال من المحل، بعدسة داكنة وإطار خفيف.",
+      "asset": "kids_sun_red.png",
+      "face_shapes": [
+        "مربع",
+        "مستطيل",
+        "قلب"
+      ],
+      "store_id": "moslem"
+    },
+    {
+      "id": "kids-sport-yellow",
+      "name": "مسلم أطفال رياضية",
+      "brand": "نظارات مسلم",
+      "price": 450,
+      "old_price": 550,
+      "category": "رياضي",
+      "kind": "شمسية",
+      "audience": "أطفال",
+      "rating": 4.5,
+      "sold": 98,
+      "stock": 12,
+      "color": "أصفر",
+      "description": "نظارة شمسية رياضية للأطفال من تشكيلة المحل، بإطار ملتف وعدسة داكنة.",
+      "asset": "kids_sport_yellow.png",
+      "face_shapes": [
+        "بيضاوي",
+        "مستطيل"
+      ],
+      "store_id": "moslem"
+    }
+  ]
+}
