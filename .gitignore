@@ -20,6 +20,13 @@ data/secrets.json
 .env.*
 *.pem
 
+# ملفات تُبنى عند النشر الثابت
+web/bootstrap.json
+web/404.html
+web/favicon.png
+web/glasses/
+web/.nojekyll
+
 # بايت كود بايثون
 __pycache__/
 *.py[cod]

@@ -346,7 +346,7 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(raw)
 
-    def _file(self, path: Path, cache: str) -> None:
+    def _file(self, path: Path, cache: str, body: bool = True) -> None:
         if not path.is_file():
             self.send_error(404)
             return
@@ -356,10 +356,25 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Cache-Control", cache)
         self.end_headers()
-        self.wfile.write(data)
+        if body:
+            self.wfile.write(data)
+
+    def _storefront(self, body: bool) -> None:
+        self._file(WEB / "index.html", "no-cache", body)
+
+    def do_HEAD(self) -> None:
+        self._route(body=False)
 
     def do_GET(self) -> None:
-        path = unquote(urlparse(self.path).path)
+        self._route(body=True)
+
+    def _route(self, body: bool) -> None:
+        path = unquote(urlparse(self.path).path) or "/"
+        if len(path) > 1 and path.endswith("/"):
+            path = path.rstrip("/")
+        if path in {"/", "/index.html", "/index"}:
+            self._storefront(body)
+            return
         if path == "/health":
             self._send(200, {"ok": True, "shop": "moslem"})
             return
@@ -382,21 +397,27 @@ class Handler(BaseHTTPRequestHandler):
             if not ASSET_NAME.fullmatch(name):
                 self.send_error(404)
                 return
-            self._file(user_glasses_dir() / name, "public, max-age=86400")
+            self._file(user_glasses_dir() / name, "public, max-age=86400", body)
             return
         if path in {"/favicon.ico", "/favicon.png"}:
-            self._file(bundle_root() / "pwa" / "icons" / "icon-192.png", "public, max-age=86400")
+            icon = bundle_root() / "pwa" / "icons" / "icon-192.png"
+            if not icon.is_file():
+                icon = WEB / "favicon.png"
+            self._file(icon, "public, max-age=86400", body)
             return
-        rel = "index.html" if path == "/" else path.lstrip("/")
+        rel = path.lstrip("/")
         target = (WEB / rel).resolve()
         root = WEB.resolve()
         if target != root and root not in target.parents:
             self.send_error(403)
             return
-        if target.suffix.lower() not in TYPES:
-            self.send_error(404)
+        if target.is_file() and target.suffix.lower() in TYPES:
+            self._file(target, "no-cache", body)
             return
-        self._file(target, "no-cache")
+        if "." not in Path(path).name:
+            self._storefront(body)
+            return
+        self.send_error(404)
 
     def do_POST(self) -> None:
         path = urlparse(self.path).path

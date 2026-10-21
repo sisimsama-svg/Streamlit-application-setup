@@ -6,7 +6,7 @@ services:
     region: frankfurt
     buildCommand: pip install --upgrade pip && pip install -r requirements-web.txt
     startCommand: python server.py
-    healthCheckPath: /health
+    healthCheckPath: /
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.8"

@@ -584,6 +584,70 @@ function feeFor(name) {
   return governorates.find((item) => item.name === name) || governorates[0] || { fee: 0, eta: "" };
 }
 
+function siteBase() {
+  const path = location.pathname || "/";
+  return path.endsWith("/") ? path : path.replace(/[^/]*$/, "");
+}
+
+function readSavedOrder(id) {
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(`moslem-order-${id}`) || "null");
+    return parsed && parsed.id ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function rememberOrder(data, lines) {
+  const ship = feeFor(data.governorate);
+  const detailed = lines.map((line) => {
+    const product = byId(line.productId);
+    const lens = lensById(line.lens);
+    const unit = (product ? product.price : 0) + (lens ? lens.price : 0);
+    return {
+      name: product?.name || "إطار",
+      qty: line.qty,
+      lens_label: lens?.label || "",
+      price: unit,
+      image: product?.image || "",
+    };
+  });
+  const subtotal = detailed.reduce((sum, line) => sum + line.price * Number(line.qty || 0), 0);
+  const id = `MO-${Math.random().toString(16).slice(2, 8).toUpperCase()}`;
+  const payment = payments.find((item) => item.id === data.payment);
+  const text = [
+    "مرحباً، أتممت طلباً من نظارات مسلم.",
+    `رقم الطلب: ${id}`,
+    `الاسم: ${data.name}`,
+    `الهاتف: ${data.phone}`,
+    `العنوان: ${data.address} — ${data.governorate}`,
+    ...detailed.map((line) => `${line.name} × ${line.qty}${line.lens_label ? ` (${line.lens_label})` : ""}`),
+    `الإجمالي: ${subtotal + Number(ship.fee || 0)} جنيه`,
+    data.note ? `ملاحظة: ${data.note}` : "",
+  ].filter(Boolean).join("\n");
+  const digits = String(shop.phone || "01148005679").replace(/\D/g, "");
+  const waPhone = digits.startsWith("0") ? `2${digits}` : digits;
+  const order = {
+    id,
+    created: new Date().toISOString().slice(0, 16).replace("T", " "),
+    status: STEPS[0],
+    name: data.name,
+    phone: data.phone,
+    address: data.address,
+    governorate: data.governorate,
+    eta: ship.eta,
+    fee: ship.fee,
+    subtotal,
+    total: subtotal + Number(ship.fee || 0),
+    payment: payment?.label || data.payment,
+    payment_ref: data.reference || "",
+    lines: detailed,
+    whatsapp: `https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`,
+  };
+  sessionStorage.setItem(`moslem-order-${id}`, JSON.stringify(order));
+  return order;
+}
+
 function paintSummary() {
   const box = view.querySelector("#summary");
   if (!box) return;
@@ -637,6 +701,12 @@ function bindCheckout() {
       od: { sph: data.od_sph, cyl: data.od_cyl, axis: data.od_axis },
       os: { sph: data.os_sph, cyl: data.os_cyl, axis: data.os_axis },
     };
+    const finish = (orderId) => {
+      setCart([]);
+      sessionStorage.setItem("moslem-just-ordered", orderId);
+      refreshChrome(parseRoute());
+      location.hash = `#/order/${encodeURIComponent(orderId)}`;
+    };
     try {
       const response = await fetch("/api/orders", {
         method: "POST",
@@ -653,16 +723,26 @@ function bindCheckout() {
           lines: lines.map((line) => ({ product_id: line.productId, qty: line.qty, lens: line.lens })),
         }),
       });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "تعذر إتمام الطلب.");
-      setCart([]);
-      sessionStorage.setItem("moslem-just-ordered", payload.id);
-      refreshChrome(parseRoute());
-      location.hash = `#/order/${encodeURIComponent(payload.id)}`;
+      const raw = await response.text();
+      let payload = null;
+      try {
+        payload = JSON.parse(raw);
+      } catch {
+        payload = null;
+      }
+      if (payload && payload.error && response.status >= 400 && response.status < 500) {
+        throw new Error(payload.error);
+      }
+      if (!response.ok || !payload || !payload.id) throw new Error("offline");
+      finish(payload.id);
     } catch (err) {
-      error.textContent = err.message || "تعذر الاتصال بالمتجر.";
-      error.hidden = false;
-      button.disabled = false;
+      if (err && err.message && err.message !== "offline") {
+        error.textContent = err.message;
+        error.hidden = false;
+        button.disabled = false;
+        return;
+      }
+      finish(rememberOrder(data, lines).id);
     }
   });
 }
@@ -708,23 +788,37 @@ function orderHtml(order, fresh) {
   `;
 }
 
+function showOrder(order) {
+  const fresh = sessionStorage.getItem("moslem-just-ordered") === order.id;
+  if (fresh) sessionStorage.removeItem("moslem-just-ordered");
+  view.innerHTML = orderHtml(order, fresh);
+}
+
 async function renderOrder(id, token) {
   document.title = "الطلب | نظارات مسلم";
+  const saved = readSavedOrder(id);
   try {
     const response = await fetch(`/api/orders/${encodeURIComponent(id)}`);
-    const payload = await response.json();
+    const raw = await response.text();
+    let payload = null;
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      payload = null;
+    }
     if (token !== viewToken) return;
-    if (!response.ok) {
-      view.innerHTML = `<section class="wrap page"><h1>لا يوجد طلب بهذا الرقم</h1><p class="empty">تأكد من الرقم، مثل MO-AB12CD.</p><a class="btn" href="#/track">تتبّع طلب</a></section>`;
+    if (response.ok && payload && payload.id) {
+      showOrder(payload);
       return;
     }
-    const fresh = sessionStorage.getItem("moslem-just-ordered") === payload.id;
-    if (fresh) sessionStorage.removeItem("moslem-just-ordered");
-    view.innerHTML = orderHtml(payload, fresh);
   } catch {
     if (token !== viewToken) return;
-    view.innerHTML = `<section class="wrap page"><h1>تعذر جلب الطلب</h1><p class="empty">تأكد أن نافذة تشغيل المتجر ما زالت مفتوحة.</p></section>`;
   }
+  if (saved) {
+    showOrder(saved);
+    return;
+  }
+  view.innerHTML = `<section class="wrap page"><h1>لا يوجد طلب بهذا الرقم</h1><p class="empty">تأكد من الرقم، مثل MO-AB12CD.</p><a class="btn" href="#/track">تتبّع طلب</a></section>`;
 }
 
 function prose(kicker, title, body) {
@@ -930,17 +1024,36 @@ function bootChrome() {
   window.addEventListener("hashchange", () => show());
 }
 
+function applyBootstrap(data) {
+  const base = siteBase();
+  catalog = (data.products || []).map((item) => {
+    const image = String(item.image || "");
+    if (image && !/^(https?:|\/)/.test(image)) item.image = base + image;
+    return item;
+  });
+  shop = data.shop || {};
+  governorates = data.governorates || [];
+  lenses = data.lenses || [];
+  payments = data.payments || [];
+}
+
+async function loadBootstrap() {
+  try {
+    const response = await fetch("/api/bootstrap");
+    const type = response.headers.get("content-type") || "";
+    if (response.ok && type.includes("json")) return await response.json();
+  } catch {
+    /* النسخة المنشورة تقرأ الملف الثابت */
+  }
+  const response = await fetch(`${siteBase()}bootstrap.json`);
+  if (!response.ok) throw new Error("bootstrap");
+  return await response.json();
+}
+
 async function boot() {
   bootChrome();
   try {
-    const response = await fetch("/api/bootstrap");
-    if (!response.ok) throw new Error("bootstrap");
-    const data = await response.json();
-    catalog = data.products || [];
-    shop = data.shop || {};
-    governorates = data.governorates || [];
-    lenses = data.lenses || [];
-    payments = data.payments || [];
+    applyBootstrap(await loadBootstrap());
   } catch {
     view.innerHTML = `<section class="wrap page"><h1>تعذر فتح التشكيلة</h1><p class="empty">أعد تشغيل المتجر من ملف run.bat ثم حدّث الصفحة.</p></section>`;
     return;
