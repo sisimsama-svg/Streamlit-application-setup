@@ -462,11 +462,11 @@ export function mountTryOn(root, options) {
     if (!products.some((item) => item.id === id)) return;
     currentId = id;
     paintPanel();
-    document.title = `${current().name} — تجربة حية | نظارات مسلم`;
+    document.title = `${current().name} — تجربة حية | مسلم`;
   }
 
   paintPanel();
-  document.title = `${current()?.name || "التجربة الحية"} — تجربة حية | نظارات مسلم`;
+  document.title = `${current()?.name || "التجربة الحية"} — تجربة حية | مسلم`;
 
   return {
     select,

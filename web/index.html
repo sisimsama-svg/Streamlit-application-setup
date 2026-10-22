@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>نظارات مسلم | MOSLEM</title>
-  <meta name="description" content="متجر نظارات مسلم في باب اللوق. نظارات طبية وشمسية، تجربة حية على الوجه، وتوصيل لكل المحافظات.">
+  <title>مسلم | Muslam Optics</title>
+  <meta name="description" content="مسلم - Muslam Optics في باب اللوق. نظارات طبية وشمسية، تجربة حية على الوجه، وتوصيل لكل المحافظات.">
   <meta name="theme-color" content="#111111">
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,13 +18,12 @@
     <div class="announce">توصيل من باب اللوق إلى كل المحافظات</div>
     <header class="header">
       <nav class="links" aria-label="روابط المتجر">
+        <a href="#/shop">التشكيلة</a>
         <a href="#/tryon">التجربة الحية</a>
         <a href="#/track">تتبّع الطلب</a>
-        <a href="#/contact">تواصل معنا</a>
       </nav>
       <a class="brand" href="#/">
-        <span class="brand-mark">MOSLEM</span>
-        <span class="brand-ar">نظارات مسلم</span>
+        <span class="brand-lockup"><span class="brand-ar">مسلم</span><span class="brand-dash">-</span><span class="brand-en">Muslam Optics</span></span>
       </a>
       <div class="tools">
         <button type="button" class="icon-btn" id="open-search" aria-label="بحث">
@@ -53,8 +52,8 @@
   <footer class="footer">
     <div class="wrap footer-grid">
       <div>
-        <p class="brand-mark footer-mark">MOSLEM</p>
-        <p>نظارات مسلم، محل واحد في باب اللوق. إطارات طبية وشمسية، وعدسات تُجهَّز على المقاس.</p>
+        <p class="brand-lockup footer-mark"><span class="brand-ar">مسلم</span><span class="brand-dash">-</span><span class="brand-en">Muslam Optics</span></p>
+        <p>مسلم محل واحد في باب اللوق. إطارات طبية وشمسية، وعدسات تُجهَّز على المقاس.</p>
       </div>
       <div>
         <h3>تسوق</h3>
@@ -66,7 +65,7 @@
       </div>
       <div>
         <h3>المحل</h3>
-        <a href="#/about">عن نظارات مسلم</a>
+        <a href="#/about">عن مسلم</a>
         <a href="#/tryon">التجربة الحية</a>
         <a href="#/contact">باب اللوق</a>
         <a href="#/track">تتبّع الطلب</a>
@@ -82,7 +81,7 @@
     </div>
     <div class="legal">
       <div class="wrap legal-row">
-        <span>© 2026 نظارات مسلم. جميع الحقوق محفوظة.</span>
+        <span>© 2026 مسلم - Muslam Optics. جميع الحقوق محفوظة.</span>
         <span>الدفع عند الاستلام · InstaPay · فودافون كاش</span>
       </div>
     </div>
@@ -93,6 +92,20 @@
       <button type="button" id="close-search" aria-label="إغلاق">×</button>
     </form>
     <div id="search-results"></div>
+  </dialog>
+  <dialog id="buy-choice" class="buy-choice" aria-labelledby="buy-choice-title">
+    <button type="button" class="buy-close" id="buy-close" aria-label="إغلاق">×</button>
+    <p class="kicker">شراء</p>
+    <h2 id="buy-choice-title">كيف تريد الإطار؟</h2>
+    <p id="buy-choice-name" class="buy-name"></p>
+    <div class="choice-actions">
+      <button type="button" class="btn block" id="buy-plain">بدون عدسات</button>
+      <button type="button" class="btn ghost block" id="buy-rx">بعدسات طبية</button>
+    </div>
+    <div id="buy-wa" class="buy-wa" hidden>
+      <p>أرسل الكشف والعدسة المحددة مباشرة إلى المحل.</p>
+      <a class="btn wa block" id="buy-wa-link" href="https://wa.me/201148005679" target="_blank" rel="noopener">واتساب</a>
+    </div>
   </dialog>
   <div id="toast" class="toast" hidden role="status"></div>
   <script type="module" src="app.js"></script>

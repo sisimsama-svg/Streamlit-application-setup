@@ -44,12 +44,13 @@ h1, h2, h3 { line-height: 1.25; font-weight: 700; }
   background: #fff;
 }
 .announce {
-  background: #111;
+  background: #000;
   color: #fff;
   text-align: center;
-  font-size: 13px;
-  letter-spacing: 0.02em;
-  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 9px 16px;
 }
 .header {
   display: grid;
@@ -64,19 +65,24 @@ h1, h2, h3 { line-height: 1.25; font-weight: 700; }
 .tools { justify-content: flex-end; }
 .links a { font-size: 13.5px; font-weight: 600; }
 .brand { text-align: center; color: #111; }
-.brand-mark {
+.brand-lockup {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  line-height: 1;
+}
+.brand-ar { font-size: 28px; font-weight: 800; }
+.brand-dash { font-size: 22px; font-weight: 500; color: #111; }
+.brand-en {
   font-family: Outfit, "Segoe UI", sans-serif;
   direction: ltr;
   unicode-bidi: isolate;
-  display: inline-block;
-  font-weight: 600;
-  letter-spacing: 0.28em;
-  font-size: 22px;
-  border-bottom: 2px solid #111;
-  padding-bottom: 1px;
-  line-height: 1;
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: 0.01em;
 }
-.brand-ar { display: block; margin-top: 6px; font-size: 13px; font-weight: 600; color: #333; }
 .icon-btn {
   width: 42px;
   height: 42px;
@@ -248,47 +254,73 @@ h1, h2, h3 { line-height: 1.25; font-weight: 700; }
 }
 .rail-head h2, .page-head h1 { font-size: clamp(28px, 3vw, 40px); }
 .rail-head a { border-bottom: 1px solid #111; font-weight: 700; padding-bottom: 2px; }
-.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px 16px; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 36px 18px; }
+.card { background: #fff; }
 .card-visual {
   position: relative;
-  background: var(--soft);
-  min-height: 230px;
+  background: #fff;
+  min-height: 240px;
   display: grid;
   place-items: center;
-  padding: 22px 16px;
-  margin-bottom: 12px;
+  padding: 28px 18px 12px;
 }
-.card-visual img { width: 100%; height: 150px; object-fit: contain; transition: transform 0.35s ease; }
-.card:hover img { transform: scale(1.05); }
+.card-visual img { width: 100%; height: 160px; object-fit: contain; transition: transform 0.35s ease; }
+.card:hover img { transform: scale(1.04); }
 .card.is-out img { opacity: 0.4; }
-.badge {
+.flags {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.flag {
+  font-family: Outfit, "Segoe UI", sans-serif;
+  direction: ltr;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 6px 8px;
+  background: #111;
+  color: #fff;
+}
+.flag.sale { background: var(--sale); }
+.flag.sold { background: #767676; }
+.badge {
   background: var(--sale);
   color: #fff;
+  font-family: Outfit, sans-serif;
   font-size: 12px;
   font-weight: 700;
+  letter-spacing: 0.06em;
   padding: 3px 7px;
 }
-.badge.sold { background: #111; }
-.card-name { font-weight: 700; font-size: 15.5px; }
-.card-meta { color: var(--muted); font-size: 13px; margin: 2px 0 6px; }
-.card-price { display: flex; gap: 8px; align-items: baseline; font-weight: 700; }
-.card-price s { color: #999; font-weight: 500; font-size: 13px; }
-.card-actions { display: flex; gap: 8px; margin-top: 10px; }
-.card-actions button, .card-actions a {
-  flex: 1;
-  min-height: 38px;
+.card-brand {
+  font-family: Outfit, Cairo, sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.card-name { display: block; font-weight: 600; font-size: 15.5px; margin-top: 3px; }
+.card-price { display: flex; gap: 8px; align-items: baseline; font-weight: 700; margin-top: 6px; }
+.card-price s, .price-row s { color: #9a9a9a; font-weight: 500; font-size: 14px; }
+.card-price.is-sale strong, .price-row.is-sale strong { color: var(--sale); }
+.card-buy {
+  margin-top: 12px;
+  width: 100%;
+  min-height: 42px;
   border: 1px solid #111;
   background: #fff;
   cursor: pointer;
-  font-size: 13px;
   font-weight: 700;
-  display: grid;
-  place-items: center;
 }
-.card-actions button { background: #111; color: #fff; }
+.card-buy:hover { background: #111; color: #fff; }
+.card-buy:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .band { background: var(--sand); }
 .band.ink { background: #111; color: #fff; }
@@ -351,18 +383,30 @@ textarea { min-height: 96px; padding: 12px; resize: vertical; }
 .crumbs { display: flex; gap: 8px; color: var(--muted); font-size: 13px; margin-bottom: 18px; flex-wrap: wrap; }
 .pdp { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 48px; align-items: start; }
 .pdp-gallery {
-  background: var(--soft);
-  min-height: 520px;
-  display: grid;
-  place-items: center;
-  padding: 36px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
   position: sticky;
-  top: 150px;
+  top: 132px;
 }
-.pdp-gallery img { width: min(100%, 680px); }
+.try-live {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
+  padding: 12px 16px;
+  background: #111;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+}
+.try-live:hover { background: #000; }
+.pdp-gallery img { width: 100%; background: #fff; padding: 12px 8px 20px; }
 .pdp-info h1 { font-size: clamp(30px, 3vw, 42px); margin: 6px 0 12px; }
 .price-row { display: flex; gap: 12px; align-items: baseline; font-size: 22px; font-weight: 800; margin-bottom: 12px; }
-.price-row s { color: #999; font-size: 16px; font-weight: 500; }
 .lead { font-size: 16.5px; margin-bottom: 16px; }
 .facts { color: #444; font-size: 14.5px; display: grid; gap: 4px; margin-bottom: 18px; }
 .lenses { border: 0; margin: 0 0 16px; padding: 0; display: grid; gap: 8px; }
@@ -539,6 +583,31 @@ textarea { min-height: 96px; padding: 12px; resize: vertical; }
 }
 .toast a { color: #fff; border-bottom: 1px solid #fff; }
 
+.buy-choice {
+  width: min(440px, calc(100% - 28px));
+  border: 0;
+  padding: 28px 24px 24px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+}
+.buy-choice::backdrop { background: rgba(0, 0, 0, 0.48); }
+.buy-close {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  font-size: 28px;
+  cursor: pointer;
+}
+.buy-choice { position: relative; }
+.buy-name { margin-top: 6px; font-weight: 700; }
+.choice-actions { display: grid; gap: 10px; margin-top: 18px; }
+.buy-wa { display: grid; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.buy-wa p { color: #333; }
+.btn.wa { background: #128c7e; border-color: #128c7e; color: #fff; }
+
 @media (max-width: 980px) {
   .links { display: none; }
   .grid, .benefits, .footer-grid { grid-template-columns: 1fr 1fr; }
@@ -550,6 +619,9 @@ textarea { min-height: 96px; padding: 12px; resize: vertical; }
   .mosaic { grid-template-columns: 1fr; }
   .tile { min-height: 320px; }
   .header { padding-inline: 12px; }
+  .brand-ar { font-size: 22px; }
+  .brand-en { font-size: 16px; }
+  .try-live { font-size: 16px; min-height: 56px; }
   .wrap { width: min(var(--max), calc(100% - 28px)); }
 }
 
