@@ -143,13 +143,26 @@ function shopHref(params) {
 }
 
 function navKey(route) {
-  if (route.name === "tryon") return "tryon";
   if (route.name !== "shop") return "";
-  if (route.query.get("sale") === "1" && !route.query.get("kind") && !route.query.get("audience")) return "sale";
-  if (route.query.get("audience") === "أطفال" && !route.query.get("kind")) return "kids";
-  if (route.query.get("kind") === "شمسية" && !route.query.get("audience") && route.query.get("sale") !== "1") return "sun";
-  if (route.query.get("kind") === "طبية" && !route.query.get("audience") && route.query.get("sale") !== "1") return "medical";
+  const query = route.query;
+  if (query.get("deal") === "1") return "sale";
+  if (query.get("sort") === "sold" && !query.get("kind") && !query.get("audience")) return "best";
+  if (query.get("audience") === "رجالي" && !query.get("kind")) return "men";
+  if (query.get("audience") === "حريمي" && !query.get("kind")) return "women";
+  if (query.get("audience") === "أطفال" && !query.get("kind")) return "kids";
+  if (query.get("kind") === "شمسية" && !query.get("audience")) return "sun";
+  if (query.get("kind") === "طبية" && !query.get("audience")) return "medical";
   return "";
+}
+
+function setMenu(open) {
+  const menu = document.getElementById("side-menu");
+  const scrim = document.getElementById("menu-scrim");
+  if (!menu || !scrim) return;
+  menu.classList.toggle("is-open", open);
+  scrim.hidden = !open;
+  document.body.classList.toggle("menu-open", open);
+  document.getElementById("open-menu")?.setAttribute("aria-expanded", open ? "true" : "false");
 }
 
 function refreshChrome(route) {
@@ -224,20 +237,21 @@ function card(product) {
   const gone = product.stock <= 0;
   const best = bestsellerIds().has(product.id);
   const flags = [
-    discount ? `<span class="flag sale">SALE</span>` : "",
     best ? `<span class="flag">BESTSELLER</span>` : "",
+    discount ? `<span class="flag sale">${discount}% OFF</span>` : "",
     gone ? `<span class="flag sold">SOLD OUT</span>` : "",
   ].filter(Boolean).join("");
   return `
     <article class="card${gone ? " is-out" : ""}">
-      <a class="card-visual" href="#/product/${encodeURIComponent(product.id)}">
-        ${flags ? `<span class="flags">${flags}</span>` : ""}
-        <img src="${esc(product.image)}" alt="${esc(product.name)}">
+      <a class="card-hit" href="#/product/${encodeURIComponent(product.id)}">
+        <span class="card-visual">
+          ${flags ? `<span class="flags">${flags}</span>` : ""}
+          <img src="${esc(product.image)}" alt="${esc(product.name)}">
+        </span>
+        <span class="card-brand">${esc(brandLabel(product.brand))}</span>
+        <span class="card-name">${esc(product.name)}</span>
+        <span class="card-price${discount ? " is-sale" : ""}">${discount ? `<s>${money(product.old_price)}</s>` : ""}<strong>${money(product.price)}</strong></span>
       </a>
-      <p class="card-brand">${esc(brandLabel(product.brand))}</p>
-      <a class="card-name" href="#/product/${encodeURIComponent(product.id)}">${esc(product.name)}</a>
-      <div class="card-price${discount ? " is-sale" : ""}"><strong>${money(product.price)}</strong>${discount ? `<s>${money(product.old_price)}</s>` : ""}</div>
-      <button type="button" class="card-buy" data-buy="${esc(product.id)}" ${gone ? "disabled" : ""}>شراء</button>
     </article>
   `;
 }
@@ -251,6 +265,7 @@ function filtered(route) {
   const category = query.get("category") || "";
   const brand = query.get("brand") || "";
   const sale = query.get("sale") === "1";
+  const deal = query.get("deal") === "1";
   const sort = query.get("sort") || "featured";
   if (q) items = items.filter((item) => matches(item, q));
   if (kind) items = items.filter((item) => item.kind === kind);
@@ -260,6 +275,7 @@ function filtered(route) {
   if (category) items = items.filter((item) => item.category === category);
   if (brand) items = items.filter((item) => item.brand === brand);
   if (sale) items = items.filter((item) => off(item) > 0);
+  if (deal) items = items.filter((item) => off(item) > 0);
   if (sort === "price-asc") items.sort((a, b) => a.price - b.price);
   if (sort === "price-desc") items.sort((a, b) => b.price - a.price);
   if (sort === "sold") items.sort((a, b) => b.sold - a.sold);
@@ -268,8 +284,12 @@ function filtered(route) {
 
 function shopTitle(route) {
   const query = route.query;
+  if (query.get("deal") === "1") return "عروض وخصومات";
+  if (query.get("sort") === "sold" && !query.get("kind") && !query.get("audience")) return "الأكثر مبيعاً";
+  if (query.get("audience") === "رجالي" && !query.get("kind")) return "رجالي";
+  if (query.get("audience") === "حريمي" && !query.get("kind")) return "حريمي";
   if (query.get("sale") === "1" && !query.get("kind")) return "تخفيضات";
-  if (query.get("audience") === "أطفال") return "نظارات الأطفال";
+  if (query.get("audience") === "أطفال") return "أطفالي";
   if (query.get("kind") === "شمسية" && query.get("audience") === "رجالي") return "نظارات شمسية رجالي";
   if (query.get("kind") === "شمسية" && query.get("audience") === "حريمي") return "نظارات شمسية حريمي";
   if (query.get("kind") === "شمسية") return "النظارات الشمسية";
@@ -288,179 +308,17 @@ function option(value, label, current) {
 }
 
 function homeHtml() {
-  const pick = (id, fallback) => byId(id) || catalog.find(fallback) || catalog[0];
-  const heroSun = pick("wayfarer-black", (item) => item.kind === "شمسية");
-  const heroTry = pick("aviator-silver", (item) => item.kind === "شمسية");
-  const heroRx = pick("classic-black", (item) => item.kind === "طبية");
-  const her = pick("round-sun-gold", (item) => item.audience === "حريمي" && item.kind === "شمسية");
-  const him = pick("aviator-silver", (item) => item.audience === "رجالي" && item.kind === "شمسية");
-  const best = catalog.slice().sort((a, b) => b.sold - a.sold).slice(0, 4);
-  const medical = catalog.filter((item) => item.kind === "طبية" && item.audience !== "أطفال").slice(0, 4);
-  const kids = catalog.filter((item) => item.audience === "أطفال").slice(0, 4);
-  const brands = unique("brand");
-  const slide = (theme, product, kicker, title, text, primary, secondary) => `
-    <article class="slide ${theme}">
-      <div class="hero-copy">
-        <p class="kicker${theme === "sand" ? "" : " light"}">${kicker}</p>
-        <h1>${title}</h1>
-        <p>${text}</p>
-        <div class="hero-actions">
-          <a class="btn ${theme === "sand" ? "" : "light"}" href="${primary.href}">${primary.label}</a>
-          <a class="text-link" href="${secondary.href}">${secondary.label}</a>
-        </div>
-      </div>
-      <div class="hero-visual">${product ? `<img src="${esc(product.image)}" alt="${esc(product.name)}">` : ""}</div>
-    </article>
-  `;
-  return `
-    <section class="hero" id="hero">
-      ${slide("wine", heroSun, "BAB EL LOUK", "إطلالة أوضح<br>من باب اللوق", "نظارات طبية وشمسية من محل واحد، جاهزة للتجربة على وجهك قبل الطلب.", { href: "#/shop", label: "تسوق التشكيلة" }, { href: "#/tryon", label: "جرّب على وجهك" })}
-      ${slide("ink", heroTry, "LIVE TRY-ON", "الإطار على وجهك<br>قبل ما تطلبه", "افتح الكاميرا. التتبّع يثبت النظارة على عينيك مباشرة، والصورة تبقى على جهازك.", { href: "#/tryon", label: "ابدأ التجربة الحية" }, { href: "#/shop?kind=شمسية", label: "النظارات الشمسية" })}
-      ${slide("sand", heroRx, "OPTICAL", "أساسيات النظارات<br>الطبية", "إطارات يومية من باب اللوق، مع عدسة عادية أو Blue Cut أو طبية شمسية.", { href: "#/shop?kind=طبية", label: "تسوق الطبية" }, { href: "#/shipping", label: "التوصيل" })}
-      <button type="button" class="hero-arrow prev" data-hero="-1" aria-label="الشريحة السابقة">‹</button>
-      <button type="button" class="hero-arrow next" data-hero="1" aria-label="الشريحة التالية">›</button>
-      <div class="hero-dots" id="hero-dots"></div>
-    </section>
-    <div class="wrap mosaic">
-      <a class="tile rose" href="#/shop?kind=شمسية&audience=حريمي">
-        ${her ? `<img src="${esc(her.image)}" alt="">` : ""}
-        <span><small>لها</small><strong>نظارات شمسية</strong></span>
-      </a>
-      <a class="tile stone" href="#/shop?kind=شمسية&audience=رجالي">
-        ${him ? `<img src="${esc(him.image)}" alt="">` : ""}
-        <span><small>له</small><strong>نظارات شمسية</strong></span>
-      </a>
-    </div>
-    <section class="wrap section">
-      <div class="rail-head">
-        <div><p class="kicker">BESTSELLERS</p><h2>الأكثر طلباً</h2></div>
-        <a href="#/shop?sort=sold">عرض الكل</a>
-      </div>
-      <div class="grid">${best.map(card).join("")}</div>
-    </section>
-    <section class="band ink">
-      <div class="wrap section try-banner">
-        <div>
-          <p class="kicker light">LIVE VIRTUAL TRY-ON</p>
-          <h2>قف أمام الكاميرا وجرّب الإطار</h2>
-          <p>تتبّع للعينين لحظة بلحظة، مع اقتراح شكل الوجه. لا نرفع صورة الكاميرا.</p>
-          <a class="btn light" href="#/tryon/${encodeURIComponent(heroTry?.id || "")}">افتح التجربة</a>
-        </div>
-        <img src="${esc(heroTry?.image || "")}" alt="">
-      </div>
-    </section>
-    <section class="wrap section">
-      <div class="rail-head">
-        <div><p class="kicker">EVERYDAY</p><h2>أساسيات النظارات الطبية</h2></div>
-        <a href="#/shop?kind=طبية">عرض الكل</a>
-      </div>
-      <div class="grid">${medical.map(card).join("")}</div>
-    </section>
-    <section class="band">
-      <div class="wrap section">
-        <div class="rail-head">
-          <div><p class="kicker">KIDS</p><h2>إطارات خفيفة للأطفال</h2></div>
-          <a href="#/shop?audience=أطفال">عرض الكل</a>
-        </div>
-        <div class="grid">${kids.map(card).join("")}</div>
-      </div>
-    </section>
-    <section class="wrap">
-      <div class="benefits">
-        <article><h3>تجربة حية</h3><p>الكاميرا تتبع الوجه والإطار يتحرك معك قبل الشراء.</p></article>
-        <article><h3>محل واحد</h3><p>كل الإطارات من مسلم - Muslem Optics في باب اللوق، من غير منصة تجّار.</p></article>
-        <article><h3>عدسات على المقاس</h3><p>عدسة عادية، Blue Cut، أو طبية شمسية. الروشتة تُراجع قبل القص.</p></article>
-        <article><h3>توصيل المحافظات</h3><p>الرسوم والمدة تظهر قبل تأكيد الطلب، والدفع عند الاستلام متاح.</p></article>
-      </div>
-    </section>
-    <section class="wrap section brands">
-      <p class="kicker">AT THE SHOP</p>
-      <h2>ماركات تجدها في المحل</h2>
-      <div class="brand-row">${brands.map((brand) => `<a href="${shopHref({ brand })}">${esc(brandLabel(brand))}</a>`).join("")}</div>
-    </section>
-  `;
-}
-
-function bindHome() {
-  const slides = [...view.querySelectorAll(".slide")];
-  const hero = view.querySelector("#hero");
-  const dots = view.querySelector("#hero-dots");
-  if (!slides.length) return () => {};
-  let index = 0;
-  dots.innerHTML = slides.map((_, dot) => `<button type="button" data-dot="${dot}" aria-label="شريحة ${dot + 1}"></button>`).join("");
-  const showSlide = (next) => {
-    index = (next + slides.length) % slides.length;
-    slides.forEach((slide, slideIndex) => slide.classList.toggle("is-on", slideIndex === index));
-    dots.querySelectorAll("button").forEach((button, dot) => button.classList.toggle("is-on", dot === index));
-    hero.classList.toggle("theme-sand", slides[index].classList.contains("sand"));
-  };
-  showSlide(0);
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const timer = reduced ? 0 : setInterval(() => showSlide(index + 1), 6800);
-  hero.addEventListener("click", (event) => {
-    const arrow = event.target.closest("[data-hero]");
-    const dot = event.target.closest("[data-dot]");
-    if (arrow) showSlide(index + Number(arrow.dataset.hero));
-    if (dot) showSlide(Number(dot.dataset.dot));
-  });
-  return () => { if (timer) clearInterval(timer); };
+  return `<section class="wrap shop-grid"><div class="grid">${catalog.map(card).join("")}</div></section>`;
 }
 
 function shopHtml(route) {
   const items = filtered(route);
-  const current = {
-    kind: route.query.get("kind") || "الكل",
-    audience: route.query.get("audience") || "الكل",
-    category: route.query.get("category") || "الكل",
-    brand: route.query.get("brand") || "الكل",
-    sort: route.query.get("sort") || "featured",
-    sale: route.query.get("sale") === "1",
-    q: route.query.get("q") || "",
-  };
-  const kinds = ["الكل", ...unique("kind")];
-  const audiences = ["الكل", ...unique("audience").filter((item) => item !== "للجميع")];
-  const categories = ["الكل", ...unique("category")];
-  const brands = ["الكل", ...unique("brand")];
   return `
-    <section class="wrap page">
-      <header class="page-head">
-        <div>
-          <p class="kicker">SHOP</p>
-          <h1>${esc(shopTitle(route))}</h1>
-        </div>
-        <p class="count">${items.length} إطاراً</p>
-      </header>
-      ${current.q ? `<a class="chip" href="${shopHref({ ...current, q: "", sale: current.sale ? "1" : "" })}">بحث: ${esc(current.q)} ×</a>` : ""}
-      <form class="filters" id="filters">
-        <label>النوع<select name="kind">${kinds.map((item) => option(item, item === "الكل" ? "الكل" : item, current.kind)).join("")}</select></label>
-        <label>الفئة<select name="audience">${audiences.map((item) => option(item, item, current.audience)).join("")}</select></label>
-        <label>شكل الإطار<select name="category">${categories.map((item) => option(item, item, current.category)).join("")}</select></label>
-        <label>الماركة<select name="brand">${brands.map((item) => option(item, item === "الكل" ? "الكل" : brandLabel(item), current.brand)).join("")}</select></label>
-        <label>الترتيب<select name="sort">
-          ${option("featured", "ترتيب المحل", current.sort)}
-          ${option("sold", "الأكثر طلباً", current.sort)}
-          ${option("price-asc", "السعر: الأقل", current.sort)}
-          ${option("price-desc", "السعر: الأعلى", current.sort)}
-        </select></label>
-      </form>
-      <label class="stack" style="margin:-12px 0 22px"><span style="display:flex;gap:8px;align-items:center"><input id="sale-only" type="checkbox" ${current.sale ? "checked" : ""} style="width:auto;min-height:0"> التخفيضات فقط</span></label>
-      ${items.length ? `<div class="grid">${items.map(card).join("")}</div>` : `<p class="empty">لا توجد إطارات بهذه الاختيارات. <a href="#/shop" style="border-bottom:1px solid #111">اعرض التشكيلة كلها</a></p>`}
+    <section class="wrap shop-grid">
+      <h1 class="grid-title">${esc(shopTitle(route))}</h1>
+      ${items.length ? `<div class="grid">${items.map(card).join("")}</div>` : `<p class="empty">لا توجد إطارات في هذا القسم.</p>`}
     </section>
   `;
-}
-
-function bindShop() {
-  const form = view.querySelector("#filters");
-  const sale = view.querySelector("#sale-only");
-  const apply = () => {
-    const data = Object.fromEntries(new FormData(form).entries());
-    if (sale.checked) data.sale = "1";
-    const q = parseRoute().query.get("q") || "";
-    if (q) data.q = q;
-    location.hash = shopHref(data);
-  };
-  form.addEventListener("change", apply);
-  sale.addEventListener("change", apply);
 }
 
 function productHtml(id) {
@@ -935,8 +793,7 @@ function render(route, token) {
 }
 
 function bind(route, token) {
-  if (route.name === "home") return bindHome();
-  if (route.name === "shop") { bindShop(); return null; }
+  if (route.name === "home" || route.name === "shop") return null;
   if (route.name === "product") return null;
   if (route.name === "checkout") { bindCheckout(); return null; }
   if (route.name === "track") {
@@ -968,6 +825,7 @@ function bind(route, token) {
 function show({ scroll = true } = {}) {
   const token = ++viewToken;
   const route = parseRoute();
+  setMenu(false);
   if (tryonApi && route.name === "tryon") {
     tryonApi.select(route.id);
     refreshChrome(route);
@@ -1004,7 +862,17 @@ function renderSearch(text) {
 }
 
 function bootChrome() {
+  document.getElementById("open-menu").addEventListener("click", () => setMenu(true));
+  document.getElementById("close-menu").addEventListener("click", () => setMenu(false));
+  document.getElementById("menu-scrim").addEventListener("click", () => setMenu(false));
+  document.getElementById("side-menu").addEventListener("click", (event) => {
+    if (event.target.closest("a")) setMenu(false);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setMenu(false);
+  });
   document.getElementById("open-search").addEventListener("click", () => {
+    setMenu(false);
     document.getElementById("search").showModal();
     document.getElementById("q").focus();
   });
