@@ -184,7 +184,7 @@ function stockLabel(stock) {
 
 function brandLabel(brand) {
   const value = String(brand || "");
-  if (value === "نظارات مسلم" || value === "مسلم" || /^moslem$/i.test(value)) return "Muslam";
+  if (value === "نظارات مسلم" || value === "مسلم" || /^(moslem|muslam|muslem)$/i.test(value)) return "Muslem";
   return value;
 }
 
@@ -368,7 +368,7 @@ function homeHtml() {
     <section class="wrap">
       <div class="benefits">
         <article><h3>تجربة حية</h3><p>الكاميرا تتبع الوجه والإطار يتحرك معك قبل الشراء.</p></article>
-        <article><h3>محل واحد</h3><p>كل الإطارات من مسلم - Muslam Optics في باب اللوق، من غير منصة تجّار.</p></article>
+        <article><h3>محل واحد</h3><p>كل الإطارات من مسلم - Muslem Optics في باب اللوق، من غير منصة تجّار.</p></article>
         <article><h3>عدسات على المقاس</h3><p>عدسة عادية، Blue Cut، أو طبية شمسية. الروشتة تُراجع قبل القص.</p></article>
         <article><h3>توصيل المحافظات</h3><p>الرسوم والمدة تظهر قبل تأكيد الطلب، والدفع عند الاستلام متاح.</p></article>
       </div>
@@ -632,7 +632,7 @@ function rememberOrder(data, lines) {
   const id = `MO-${Math.random().toString(16).slice(2, 8).toUpperCase()}`;
   const payment = payments.find((item) => item.id === data.payment);
   const text = [
-    "مرحباً، أتممت طلباً من مسلم - Muslam Optics.",
+    "مرحباً، أتممت طلباً من مسلم - Muslem Optics.",
     `رقم الطلب: ${id}`,
     `الاسم: ${data.name}`,
     `الهاتف: ${data.phone}`,
@@ -847,7 +847,7 @@ function pageHtml(name) {
   const wa = esc(shop.whatsapp || "#");
   if (name === "about") {
     return prose("THE SHOP", "عن مسلم", `
-      <p>مسلم - Muslam Optics محل نظارات في باب اللوق بالقاهرة. هذا الموقع واجهة المحل نفسه: الإطارات المعروضة تُختار وتُشحن منه، وليست سوقاً لمحلات أخرى.</p>
+      <p>مسلم - Muslem Optics محل نظارات في باب اللوق بالقاهرة. هذا الموقع واجهة المحل نفسه: الإطارات المعروضة تُختار وتُشحن منه، وليست سوقاً لمحلات أخرى.</p>
       <p>تجد في التشكيلة نظارات طبية وشمسية للرجال والنساء والأطفال، وبعض الماركات الموجودة داخل المحل مثل أوكلي وبوليس إلى جانب إطارات مسلم.</p>
       <p>يمكن تجربة الإطار على الوجه بالكاميرا قبل الطلب. الصورة تُعالج في متصفحك ولا تُرفع إلينا.</p>
     `);
@@ -875,7 +875,7 @@ function pageHtml(name) {
       <h2>ما طرق الدفع؟</h2>
       <p>الدفع عند الاستلام، أو InstaPay على ${esc(shop.instapay || "")}، أو فودافون كاش على ${phone}.</p>
       <h2>من أين يصل الطلب؟</h2>
-      <p>من مسلم - Muslam Optics في ${esc(shop.address || "باب اللوق")}. لا يوجد تجار آخرون على الموقع.</p>
+      <p>من مسلم - Muslem Optics في ${esc(shop.address || "باب اللوق")}. لا يوجد تجار آخرون على الموقع.</p>
     `);
   }
   if (name === "contact") {
@@ -897,7 +897,7 @@ function pageHtml(name) {
     return prose("TERMS", "الشروط", `
       <p>الأسعار بالجنيه المصري وتشمل الإطار والعدسة المختارة، ولا تشمل التوصيل إلا بعد اختيار المحافظة.</p>
       <p>المخزون يُحدَّث عند تأكيد الطلب. إذا نفدت الكمية قبل التأكيد تظهر رسالة ولن يُخصم المبلغ من المخزون.</p>
-      <p>الموقع خاص بمسلم - Muslam Optics في باب اللوق، وليس منصة لتسجيل محلات.</p>
+      <p>الموقع خاص بمسلم - Muslem Optics في باب اللوق، وليس منصة لتسجيل محلات.</p>
     `);
   }
   return prose("404", "الصفحة غير موجودة", `<p><a href="#/">العودة إلى الرئيسية</a></p>`);
@@ -905,7 +905,7 @@ function pageHtml(name) {
 
 function render(route, token) {
   const titles = {
-    home: "مسلم | Muslam Optics",
+    home: "مسلم | Muslem Optics",
     shop: `${shopTitle(route)} | مسلم`,
     product: "الإطار | مسلم",
     cart: "السلة | مسلم",

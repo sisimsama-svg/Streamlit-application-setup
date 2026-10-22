@@ -33,7 +33,7 @@ TYPES = {
 
 SHOP = {
     "name": "مسلم",
-    "name_en": "Muslam Optics",
+    "name_en": "Muslem Optics",
     "address": "باب اللوق، القاهرة",
     "phone": "01148005679",
     "whatsapp": "https://wa.me/201148005679",
@@ -289,7 +289,7 @@ def _build_order(body: dict) -> dict:
     while order_id in taken:
         order_id = f"MO-{uuid.uuid4().hex[:6].upper()}"
     text = (
-        f"مرحباً، أتممت طلباً من مسلم - Muslam Optics.\n"
+        f"مرحباً، أتممت طلباً من مسلم - Muslem Optics.\n"
         f"رقم الطلب: {order_id}\n"
         f"الإجمالي: {subtotal + fee} جنيه"
     )
@@ -483,7 +483,7 @@ def serve() -> None:
         except OSError:
             continue
         shown = os.environ.get("RENDER_EXTERNAL_URL") or f"http://{host}:{httpd.server_address[1]}"
-        print(f"مسلم - Muslam Optics  {shown}")
+        print(f"مسلم - Muslem Optics  {shown}")
         if local:
             threading.Timer(0.8, lambda u=shown: webbrowser.open(u)).start()
         try:
