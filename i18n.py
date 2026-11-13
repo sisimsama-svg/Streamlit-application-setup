@@ -13,13 +13,13 @@ TEXT = {
     "admin": {"ar": "الإدارة", "en": "Admin"},
     "cart_pill": {"ar": "السلة ({n})", "en": "Cart ({n})"},
     "loc_ar": {"ar": "باب اللوق، القاهرة", "en": "Bab El Louk, Cairo"},
-    "hero_title": {"ar": "نظارات مسلم — باب اللوق", "en": "Moslem Optics — Bab El Louk"},
+    "hero_title": {"ar": "نظارات مسلم — باب اللوق", "en": "Muslem Optics — Bab El Louk"},
     "hero_body": {
         "ar": "نظارات طبية وشمسية من المحل، منها أوكلي وبوليس. جرّب الإطار على وجهك، أرسل الروشتة، ثم ادفع عند الاستلام أو عبر InstaPay وفودافون كاش.",
         "en": "Medical and sun glasses from the shop, including Oakley and Police. Try a frame on your face, send your prescription, then pay cash on delivery, by InstaPay, or by Vodafone Cash.",
     },
     "search": {"ar": "ابحث عن نظارة أو متجر أو محافظة", "en": "Search frames, stores, or governorates"},
-    "search_ph": {"ar": "مثال: أوكلي، نظارات مسلم، القاهرة، شمسية", "en": "Example: Oakley, Moslem Optics, Cairo, sunglasses"},
+    "search_ph": {"ar": "مثال: أوكلي، نظارات مسلم، القاهرة، شمسية", "en": "Example: Oakley, Muslem Optics, Cairo, sunglasses"},
     "use": {"ar": "الاستخدام", "en": "Type"},
     "audience": {"ar": "الجمهور", "en": "For"},
     "frame_shape": {"ar": "شكل الإطار", "en": "Frame shape"},
@@ -76,10 +76,10 @@ TEXT = {
         "en": "Download the photo with the glasses on, or share it to ask your friends.",
     },
     "share_look": {"ar": "مشاركة الإطلالة", "en": "Share look"},
-    "share_title": {"ar": "نظارات مسلم", "en": "Moslem Optics"},
+    "share_title": {"ar": "نظارات مسلم", "en": "Muslem Optics"},
     "share_text": {
         "ar": "إطلالتي من نظارات مسلم، باب اللوق — ما رأيكم؟",
-        "en": "My look from Moslem Optics, Bab El Louk — what do you think?",
+        "en": "My look from Muslem Optics, Bab El Louk — what do you think?",
     },
     "share_opened": {"ar": "تم فتح نافذة المشاركة.", "en": "The share window is open."},
     "share_copied": {"ar": "تم نسخ الصورة. الصقها في أي تطبيق للمشاركة.", "en": "The photo was copied. Paste it into any app to share."},
@@ -241,7 +241,7 @@ TEXT = {
     "my_dashboard": {"ar": "لوحة متجري", "en": "My store dashboard"},
     "marketplace_note": {
         "ar": "نظارات مسلم هو المتجر الأساسي وتجربة الارتداء متاحة لإطاراته. المتاجر المنضمّة تظهر بعده ويمكن تجربة أي إطار بصورته الشفافة.",
-        "en": "Moslem Optics is the main store and try-on stays available for its frames. Joined stores appear after it, and any frame with a transparent image can be tried on.",
+        "en": "Muslem Optics is the main store and try-on stays available for its frames. Joined stores appear after it, and any frame with a transparent image can be tried on.",
     },
     "sold_by": {"ar": "المتجر: {store}", "en": "Store: {store}"},
     "all_stores": {"ar": "كل المتاجر", "en": "All stores"},
@@ -471,12 +471,12 @@ TEXT = {
     },
     "footer_note": {
         "ar": "نظارات مسلم — باب اللوق",
-        "en": "Moslem Optics — Bab El Louk",
+        "en": "Muslem Optics — Bab El Louk",
     },
     "policy_title": {"ar": "الشروط وسياسة الإرجاع", "en": "Terms and return policy"},
     "policy_intro": {
         "ar": "شروط الشراء وسياسة الإرجاع والاستبدال لنظارات مسلم في باب اللوق، وللمتاجر الأخرى على المنصة.",
-        "en": "Purchase terms and the return and exchange policy for Moslem Optics in Bab El Louk, and for the other stores on the platform.",
+        "en": "Purchase terms and the return and exchange policy for Muslem Optics in Bab El Louk, and for the other stores on the platform.",
     },
     "policy_disclaimer": {
         "ar": "هذا نص سياسة للمتجر داخل المنصة، وليس استشارة قانونية.",
@@ -495,7 +495,7 @@ TEXT = {
             "المتاجر الأخرى على المنصة تتبع هذه السياسة الأساسية، ما لم توضح صفحة المتجر غير ذلك."
         ),
         "en": (
-            "Moslem Optics in Bab El Louk is the main store on this platform.\n\n"
+            "Muslem Optics in Bab El Louk is the main store on this platform.\n\n"
             "- An order includes the frame, the lens if you choose one, the delivery address, and the payment method shown in the cart.\n"
             "- Prescription lenses are made from the prescription or the measurements you enter. Review them before you confirm.\n"
             "- The listed price is for the frame and lens. Delivery is added for the governorate and the store, and it is shown before you place the order.\n"
@@ -516,7 +516,7 @@ TEXT = {
             "- A prescription lens cut to your prescription is not exchanged when it matches the details you sent. If the lens was made differently from the prescription, the store reviews the order.\n"
             "- If an item arrives defective or different from the order, message the store on WhatsApp within two days of delivery and include a photo of the problem. After inspection, the defective piece can be exchanged or its price refunded by agreement.\n"
             "- If you exchange an item only because you changed your mind, and there is no defect, the delivery fee may not be refunded.\n"
-            "- Moslem Optics — Bab El Louk, Cairo. Other vendors follow this policy unless their page says otherwise."
+            "- Muslem Optics — Bab El Louk, Cairo. Other vendors follow this policy unless their page says otherwise."
         ),
     },
 }
@@ -525,6 +525,7 @@ TERMS = {
     "الكل": "All",
     "طبية": "Medical",
     "شمسية": "Sunglasses",
+    "قراءة": "Reading",
     "رجالي": "Men",
     "حريمي": "Women",
     "أطفال": "Kids",

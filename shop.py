@@ -87,7 +87,7 @@ _PAGE_ICON = bundle_root() / "pwa" / "icons" / "icon-192.png"
 if not _PAGE_ICON.is_file():
     _PAGE_ICON = bundle_root() / "assets" / "moslem.ico"
 st.set_page_config(
-    page_title="نظارات مسلم | Moslem Optics",
+    page_title="نظارات مسلم | Muslem Optics",
     page_icon=str(_PAGE_ICON) if _PAGE_ICON.is_file() else "👓",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -822,8 +822,8 @@ with lang_col:
 if picked_lang in ("ar", "en") and picked_lang != st.session_state.get("lang", "ar"):
     st.session_state.lang = picked_lang
     st.rerun()
-brand_title = "نظارات مسلم" if lang() == "ar" else "Moslem Optics"
-brand_en = "MOSLEM OPTICS" if lang() == "ar" else "نظارات مسلم"
+brand_title = "نظارات مسلم" if lang() == "ar" else "Muslem Optics"
+brand_en = "MUSLEM OPTICS" if lang() == "ar" else "نظارات مسلم"
 _logo_src = _official_logo_src()
 st.markdown(
     f"""

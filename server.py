@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import base64
+import hashlib
+import io
 import json
 import os
 import re
+import secrets
 import sys
 import threading
 import uuid
@@ -16,11 +20,24 @@ from urllib.parse import unquote, urlparse
 
 from notify import record_event, whatsapp_link
 from paths import bundle_root, data_dir, user_glasses_dir
-from products import StockError, get_product, load_products, reserve_stock
+from platform_cfg import admin_hash
+from products import (
+    AUDIENCES,
+    CATEGORIES,
+    KINDS,
+    StockError,
+    delete_product,
+    get_product,
+    load_products,
+    replace_product,
+    reserve_stock,
+)
 
 WEB = Path(__file__).resolve().parent / "web"
 LOCAL_PORTS = (8765, 8766, 8770)
 LOCK = threading.Lock()
+ADMIN_SESSIONS: set[str] = set()
+ADMIN_COOKIE = "muslem_admin"
 ASSET_NAME = re.compile(r"[a-z0-9_]+\.png")
 TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -167,6 +184,7 @@ def _public_products() -> list[dict]:
                 "color": item.get("color") or "",
                 "description": item.get("description") or "",
                 "face_shapes": list(item.get("face_shapes") or []),
+                "badge": item.get("badge") or "",
                 "image": f"/media/glasses/{asset}",
             }
         )
@@ -319,6 +337,127 @@ def _build_order(body: dict) -> dict:
     return order
 
 
+def _admin_digest(code: str) -> str:
+    return hashlib.sha256(code.strip().encode("utf-8")).hexdigest()
+
+
+def _admin_password_ok(code: str) -> bool:
+    given = str(code or "").strip()
+    if not given:
+        return False
+    saved = admin_hash()
+    if saved:
+        return _admin_digest(given) == saved
+    return given == os.environ.get("MUSLEM_ADMIN_PASSWORD", "")
+
+
+def _cookie_token(header: str) -> str:
+    for part in str(header or "").split(";"):
+        name, _, value = part.strip().partition("=")
+        if name == ADMIN_COOKIE:
+            return value.strip()
+    return ""
+
+
+def _admin_product_view(item: dict) -> dict:
+    asset = Path(str(item.get("asset") or "")).name
+    return {
+        "id": item.get("id"),
+        "name": item.get("name") or "",
+        "brand": item.get("brand") or "",
+        "price": int(item.get("price") or 0),
+        "old_price": int(item.get("old_price") or item.get("price") or 0),
+        "category": item.get("category") or "",
+        "kind": item.get("kind") or "طبية",
+        "audience": item.get("audience") or "للجميع",
+        "stock": int(item.get("stock") or 0),
+        "badge": item.get("badge") or "",
+        "image": f"/media/glasses/{asset}" if asset else "",
+    }
+
+
+def _store_upload(raw: str) -> str:
+    payload = str(raw or "").strip()
+    if not payload:
+        return ""
+    if "," in payload and payload.lower().startswith("data:"):
+        payload = payload.split(",", 1)[1]
+    try:
+        binary = base64.b64decode(payload, validate=True)
+    except Exception as exc:
+        raise ValueError("تعذر قراءة الصورة.") from exc
+    if not binary or len(binary) > 4_000_000:
+        raise ValueError("الصورة أكبر من المسموح.")
+    from PIL import Image
+
+    image = Image.open(io.BytesIO(binary)).convert("RGBA")
+    name = f"frame_{uuid.uuid4().hex[:10]}.png"
+    dest = user_glasses_dir() / name
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    image.save(dest, "PNG")
+    return name
+
+
+def _save_admin_product(body: dict) -> dict:
+    name = _clip(body.get("name"), 80)
+    brand = _clip(body.get("brand"), 40) or "نظارات مسلم"
+    kind = _clip(body.get("kind"), 20)
+    audience = _clip(body.get("audience"), 20)
+    category = _clip(body.get("category"), 40)
+    badge = _clip(body.get("badge"), 20)
+    if len(name) < 2:
+        raise ValueError("اكتب اسم الموديل.")
+    if kind not in KINDS:
+        raise ValueError("اختر نظارة شمسية أو طبية.")
+    if audience not in AUDIENCES:
+        raise ValueError("اختر القسم: رجالي أو حريمي أو أطفال.")
+    if category not in CATEGORIES:
+        category = CATEGORIES[0]
+    if badge not in {"", "bestseller", "sale"}:
+        badge = ""
+    try:
+        price = int(body.get("price"))
+        old_price = int(body.get("old_price") if body.get("old_price") not in (None, "") else price)
+        stock = int(body.get("stock") if body.get("stock") not in (None, "") else 8)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("اكتب السعر بالأرقام.") from exc
+    if price < 0 or old_price < 0 or stock < 0 or stock > 999:
+        raise ValueError("السعر أو الكمية غير صالحة.")
+    if old_price < price:
+        old_price = price
+    product_id = _clip(body.get("id"), 80)
+    existing = get_product(product_id) if product_id else None
+    if product_id and existing is None:
+        raise ValueError("هذه النظارة لم تعد موجودة.")
+    if not product_id:
+        product_id = f"frame-{uuid.uuid4().hex[:8]}"
+    asset = _store_upload(str(body.get("image") or ""))
+    if not asset:
+        asset = str((existing or {}).get("asset") or "")
+    if not asset:
+        raise ValueError("أضف صورة النظارة.")
+    record = dict(existing or {})
+    record.update(
+        {
+            "id": product_id,
+            "name": name,
+            "brand": brand,
+            "price": price,
+            "old_price": old_price,
+            "kind": kind,
+            "audience": audience,
+            "category": category,
+            "badge": badge,
+            "stock": stock,
+            "store_id": "moslem",
+            "asset": Path(asset).name,
+        }
+    )
+    replace_product(record)
+    saved = get_product(product_id)
+    return _admin_product_view(saved or record)
+
+
 def ensure_assets() -> None:
     try:
         from generate_assets import main as generate
@@ -337,14 +476,23 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:
             return
 
-    def _send(self, code: int, payload: dict) -> None:
+    def _send(self, code: int, payload: dict, extra: dict | None = None) -> None:
         raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(raw)))
         self.send_header("Cache-Control", "no-store")
+        for key, value in (extra or {}).items():
+            self.send_header(key, value)
         self.end_headers()
         self.wfile.write(raw)
+
+    def _admin_token(self) -> str:
+        return _cookie_token(self.headers.get("Cookie") or "")
+
+    def _admin_authed(self) -> bool:
+        token = self._admin_token()
+        return bool(token) and token in ADMIN_SESSIONS
 
     def _file(self, path: Path, cache: str, body: bool = True) -> None:
         if not path.is_file():
@@ -374,6 +522,20 @@ class Handler(BaseHTTPRequestHandler):
             path = path.rstrip("/")
         if path in {"/", "/index.html", "/index"}:
             self._storefront(body)
+            return
+        if path == "/admin":
+            self._file(WEB / "admin.html", "no-cache", body)
+            return
+        if path == "/api/admin/products":
+            if not self._admin_authed():
+                self._send(401, {"error": "يلزم تسجيل الدخول."})
+                return
+            items = [
+                _admin_product_view(item)
+                for item in load_products()
+                if str(item.get("store_id") or "moslem") == "moslem"
+            ]
+            self._send(200, {"products": items})
             return
         if path == "/health":
             self._send(200, {"ok": True, "shop": "moslem"})
@@ -419,17 +581,76 @@ class Handler(BaseHTTPRequestHandler):
             return
         self.send_error(404)
 
-    def do_POST(self) -> None:
-        path = urlparse(self.path).path
+    def _read_json(self, limit: int) -> dict | None:
         length = int(self.headers.get("Content-Length") or 0)
-        if length < 0 or length > 1_000_000:
+        if length < 0 or length > limit:
             self._send(413, {"error": "الطلب أكبر من المسموح."})
-            return
+            return None
         raw = self.rfile.read(length) if length else b"{}"
         try:
             body = json.loads(raw.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError):
             self._send(400, {"error": "تعذر قراءة البيانات."})
+            return None
+        if not isinstance(body, dict):
+            self._send(400, {"error": "بيانات ناقصة."})
+            return None
+        return body
+
+    def _admin_post(self, path: str) -> None:
+        body = self._read_json(6_000_000)
+        if body is None:
+            return
+        if path == "/api/admin/login":
+            if not _admin_password_ok(str(body.get("password") or "")):
+                self._send(401, {"error": "كلمة السر غير صحيحة."})
+                return
+            token = secrets.token_urlsafe(24)
+            ADMIN_SESSIONS.add(token)
+            self._send(
+                200,
+                {"ok": True},
+                {"Set-Cookie": f"{ADMIN_COOKIE}={token}; HttpOnly; Path=/; SameSite=Lax"},
+            )
+            return
+        if not self._admin_authed():
+            self._send(401, {"error": "يلزم تسجيل الدخول."})
+            return
+        if path == "/api/admin/logout":
+            ADMIN_SESSIONS.discard(self._admin_token())
+            self._send(
+                200,
+                {"ok": True},
+                {"Set-Cookie": f"{ADMIN_COOKIE}=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax"},
+            )
+            return
+        if path == "/api/admin/products":
+            try:
+                with LOCK:
+                    saved = _save_admin_product(body)
+            except ValueError as exc:
+                self._send(400, {"error": str(exc)})
+                return
+            self._send(200, saved)
+            return
+        if path == "/api/admin/products/delete":
+            product_id = _clip(body.get("id"), 80)
+            if not product_id or get_product(product_id) is None:
+                self._send(404, {"error": "النظارة غير موجودة."})
+                return
+            with LOCK:
+                delete_product(product_id, "moslem")
+            self._send(200, {"ok": True})
+            return
+        self._send(404, {"error": "غير موجود."})
+
+    def do_POST(self) -> None:
+        path = urlparse(self.path).path
+        if path.startswith("/api/admin/"):
+            self._admin_post(path)
+            return
+        body = self._read_json(1_000_000)
+        if body is None:
             return
         if path != "/api/orders":
             self._send(404, {"error": "غير موجود."})

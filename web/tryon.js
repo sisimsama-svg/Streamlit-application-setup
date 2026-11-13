@@ -1,3 +1,5 @@
+import { listJoin, productName, productText, shapeAdvice, t, term } from "./locale.js";
+
 const MODEL =
   "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
 const WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.17/wasm";
@@ -163,23 +165,23 @@ export function mountTryOn(root, options) {
 
   root.innerHTML = `
     <section class="wrap try-page">
-      <p class="kicker">LIVE TRY-ON</p>
+      <p class="kicker">${esc(t("live"))}</p>
       <div class="try-layout">
         <div>
           <div class="stage" id="stage">
             <div class="stage-placeholder" id="stage-empty">
               <div>
-                <h2>انظر إلى الكاميرا</h2>
-                <p>التتبّع يتم داخل المتصفح. صورة وجهك لا تُرسل إلى الخادم ولا تُحفظ.</p>
-                <button type="button" class="btn light" id="start-cam">تشغيل الكاميرا</button>
+                <h2>${esc(t("lookAt"))}</h2>
+                <p>${esc(t("privacyCam"))}</p>
+                <button type="button" class="btn light" id="start-cam">${esc(t("startCam"))}</button>
               </div>
             </div>
             <canvas id="stage-canvas" hidden></canvas>
-            <p class="hint" id="turn-hint" hidden>انظر مباشرة إلى الكاميرا حتى يثبت الإطار</p>
+            <p class="hint" id="turn-hint" hidden>${esc(t("lookStraight"))}</p>
             <div class="stage-bar" id="stage-bar" hidden>
-              <button type="button" id="shot">التقاط</button>
-              <button type="button" id="flip">تبديل الكاميرا</button>
-              <button type="button" id="stop-cam">إيقاف</button>
+              <button type="button" id="shot">${esc(t("capture"))}</button>
+              <button type="button" id="flip">${esc(t("flipCam"))}</button>
+              <button type="button" id="stop-cam">${esc(t("stopCam"))}</button>
             </div>
           </div>
           <div class="film" id="film"></div>
@@ -189,18 +191,18 @@ export function mountTryOn(root, options) {
           <h1 id="try-name"></h1>
           <div class="price-row" id="try-price"></div>
           <p id="try-desc"></p>
-          <label class="slider">حجم الإطار
+          <label class="slider">${esc(t("frameSize"))}
             <input id="scale" type="range" min="80" max="150" value="108">
           </label>
-          <label class="slider">ارتفاع الإطار
+          <label class="slider">${esc(t("frameHeight"))}
             <input id="dy" type="range" min="-80" max="80" value="0">
           </label>
-          <label id="lens-wrap">العدسة
+          <label id="lens-wrap">${esc(t("lens"))}
             <select id="lens-pick"></select>
           </label>
-          <button type="button" class="btn block" id="try-add">أضف إلى السلة</button>
-          <a class="btn ghost block" id="try-product" href="#/shop">صفحة الإطار</a>
-          <div class="advice" id="advice">حرّك وجهك أمام الكاميرا لنقترح الإطارات الأقرب لشكل الوجه.</div>
+          <button type="button" class="btn block" id="try-add">${esc(t("addCart"))}</button>
+          <a class="btn ghost block" id="try-product" href="#/shop">${esc(t("framePage"))}</a>
+          <div class="advice" id="advice">${esc(t("moveFace"))}</div>
           <div id="shot-box"></div>
         </aside>
       </div>
@@ -229,11 +231,12 @@ export function mountTryOn(root, options) {
   function paintPanel() {
     const product = current();
     if (!product) return;
-    root.querySelector("#try-brand").textContent = product.brand;
-    root.querySelector("#try-name").textContent = product.name;
+    const house = /^(نظارات مسلم|مسلم|moslem|muslam|muslem)$/i.test(String(product.brand || ""));
+    root.querySelector("#try-brand").textContent = house ? "Muslem" : term(product.brand);
+    root.querySelector("#try-name").textContent = productName(product.name);
     const discount = product.old_price > product.price;
     root.querySelector("#try-price").innerHTML = `${options.money(product.price)}${discount ? `<s>${options.money(product.old_price)}</s>` : ""}`;
-    root.querySelector("#try-desc").textContent = product.description;
+    root.querySelector("#try-desc").textContent = productText(product.name, product.description);
     root.querySelector("#try-product").href = `#/product/${encodeURIComponent(product.id)}`;
     const lensWrap = root.querySelector("#lens-wrap");
     const select = root.querySelector("#lens-pick");
@@ -242,7 +245,7 @@ export function mountTryOn(root, options) {
     if (medical) {
       select.innerHTML = options.lenses
         .filter((item) => item.id !== "none")
-        .map((item) => `<option value="${esc(item.id)}">${esc(item.label)}${item.price ? ` · +${options.money(item.price)}` : ""}</option>`)
+        .map((item) => `<option value="${esc(item.id)}">${esc(term(item.label))}${item.price ? ` · +${options.money(item.price)}` : ""}</option>`)
         .join("");
     }
     film.querySelectorAll("button").forEach((button) => {
@@ -258,7 +261,7 @@ export function mountTryOn(root, options) {
   film.innerHTML = products.map((product) => `
     <button type="button" data-id="${esc(product.id)}" class="${product.id === currentId ? "is-on" : ""}">
       <img src="${esc(product.image)}" alt="">
-      <small>${esc(product.name)}</small>
+      <small>${esc(productName(product.name))}</small>
     </button>
   `).join("");
   film.addEventListener("click", (event) => {
@@ -291,16 +294,16 @@ export function mountTryOn(root, options) {
 
   function showCameraError(error) {
     const name = error && error.name;
-    let message = "تعذر فتح الكاميرا.";
+    let message = t("camFail");
     if (name === "NotAllowedError" || name === "SecurityError") {
-      message = "لم يُسمح بالكاميرا. اسمح بها من أيقونة القفل بجانب العنوان ثم أعد المحاولة.";
+      message = t("camDenied");
     } else if (name === "NotFoundError" || name === "OverconstrainedError") {
-      message = "لا توجد كاميرا متاحة على هذا الجهاز.";
+      message = t("camMissing");
     } else if (!navigator.mediaDevices) {
-      message = "المتصفح لا يتيح الكاميرا من هذا العنوان. افتح المتجر من كروم أو إيدج.";
+      message = t("camUnsupported");
     }
     empty.hidden = false;
-    empty.innerHTML = `<div><h2>الكاميرا غير متاحة</h2><p>${esc(message)}</p><button type="button" class="btn light" id="start-cam">إعادة المحاولة</button></div>`;
+    empty.innerHTML = `<div><h2>${esc(t("camUnavailable"))}</h2><p>${esc(message)}</p><button type="button" class="btn light" id="start-cam">${esc(t("retry"))}</button></div>`;
     empty.querySelector("#start-cam").addEventListener("click", () => { start().catch(showCameraError); });
     canvas.hidden = true;
     root.querySelector("#stage-bar").hidden = true;
@@ -315,7 +318,7 @@ export function mountTryOn(root, options) {
     root.querySelector("#stage-bar").hidden = true;
     turnHint.hidden = true;
     empty.hidden = false;
-    empty.innerHTML = `<div><h2>انظر إلى الكاميرا</h2><p>التتبّع يتم داخل المتصفح. صورة وجهك لا تُرسل إلى الخادم ولا تُحفظ.</p><button type="button" class="btn light" id="start-cam">تشغيل الكاميرا</button></div>`;
+    empty.innerHTML = `<div><h2>${esc(t("lookAt"))}</h2><p>${esc(t("privacyCam"))}</p><button type="button" class="btn light" id="start-cam">${esc(t("startCam"))}</button></div>`;
     empty.querySelector("#start-cam").addEventListener("click", () => { start().catch(showCameraError); });
   }
 
@@ -325,7 +328,7 @@ export function mountTryOn(root, options) {
     }
     if (stream) stream.getTracks().forEach((track) => track.stop());
     empty.hidden = false;
-    empty.innerHTML = `<div><h2>جاري فتح الكاميرا</h2><p>ثم يُجهَّز تتبّع الوجه. قد يأخذ ذلك بضع ثوانٍ في أول مرة.</p></div>`;
+    empty.innerHTML = `<div><h2>${esc(t("openingCam"))}</h2><p>${esc(t("openingCamBody"))}</p></div>`;
     stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
       video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -345,7 +348,7 @@ export function mountTryOn(root, options) {
       } catch {
         empty.hidden = false;
         canvas.hidden = true;
-        empty.innerHTML = `<div><h2>تعذر تتبّع الوجه</h2><p>تحقق من الاتصال بالإنترنت حتى يُحمَّل نموذج التتبّع، ثم أعد المحاولة. الكاميرا نفسها تبقى على جهازك.</p><button type="button" class="btn light" id="start-cam">إعادة المحاولة</button></div>`;
+        empty.innerHTML = `<div><h2>${esc(t("trackFail"))}</h2><p>${esc(t("trackFailBody"))}</p><button type="button" class="btn light" id="start-cam">${esc(t("retry"))}</button></div>`;
         empty.querySelector("#start-cam").addEventListener("click", () => { start().catch(showCameraError); });
         return;
       }
@@ -443,8 +446,8 @@ export function mountTryOn(root, options) {
       stableKey = key;
       const guide = GUIDES[key];
       const matches = options.products.filter((item) => (item.face_shapes || []).includes(guide.label) && item.stock > 0).slice(0, 3);
-      const names = matches.map((item) => item.name).join("، ");
-      advice.innerHTML = `<strong>شكل الوجه: ${esc(guide.label)}</strong><br>${esc(guide.advice)}${names ? `<br><br><b>من التشكيلة:</b> ${esc(names)}` : ""}`;
+      const names = listJoin(matches.map((item) => productName(item.name)));
+      advice.innerHTML = `<strong>${esc(t("faceIs", { shape: term(guide.label) }))}</strong><br>${esc(shapeAdvice(key, guide.advice))}${names ? `<br><br><b>${esc(t("fromCollection"))}</b> ${esc(names)}` : ""}`;
     }
   }
 
@@ -454,7 +457,7 @@ export function mountTryOn(root, options) {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
       const box = root.querySelector("#shot-box");
-      box.innerHTML = `<img class="shot" alt="لقطة التجربة" src="${url}"><a class="btn ghost block" style="margin-top:8px" href="${url}" download="moslem-tryon.jpg">حفظ الصورة</a>`;
+      box.innerHTML = `<img class="shot" alt="${esc(t("shotAlt"))}" src="${url}"><a class="btn ghost block" style="margin-top:8px" href="${url}" download="moslem-tryon.jpg">${esc(t("savePhoto"))}</a>`;
     }, "image/jpeg", 0.92);
   }
 
@@ -462,11 +465,11 @@ export function mountTryOn(root, options) {
     if (!products.some((item) => item.id === id)) return;
     currentId = id;
     paintPanel();
-    document.title = `${current().name} — تجربة حية | مسلم`;
+    document.title = t("tryonTitle", { name: productName(current().name) });
   }
 
   paintPanel();
-  document.title = `${current()?.name || "التجربة الحية"} — تجربة حية | مسلم`;
+  document.title = t("tryonTitle", { name: productName(current()?.name || t("tryon")) });
 
   return {
     select,

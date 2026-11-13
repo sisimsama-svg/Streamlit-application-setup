@@ -1,4 +1,22 @@
 import { mountTryOn } from "./tryon.js";
+import {
+  applyDocument,
+  etaLabel,
+  getLang,
+  govLabel,
+  lensLabel,
+  listJoin,
+  money,
+  onLang,
+  payLabel,
+  productName,
+  productText,
+  searchBits,
+  setLang,
+  shopAddress,
+  t,
+  term,
+} from "./locale.js";
 
 const CART_KEY = "moslem-cart-v1";
 const STEPS = ["تم التجهيز", "جاري التغليف", "خرج للتوصيل"];
@@ -23,10 +41,6 @@ function esc(value) {
     '"': "&quot;",
     "'": "&#39;",
   }[ch]));
-}
-
-function money(value) {
-  return `${new Intl.NumberFormat("en-EG", { maximumFractionDigits: 0 }).format(Number(value) || 0)} ج.م`;
 }
 
 function off(product) {
@@ -72,7 +86,7 @@ function cartSubtotal() {
 
 function addToCart(product, lensId, qty) {
   if (!product || product.stock <= 0) {
-    toast("هذا الإطار نفد من التشكيلة.");
+    toast(t("outToast"));
     return false;
   }
   const cart = getCart();
@@ -80,7 +94,7 @@ function addToCart(product, lensId, qty) {
   const found = cart.find((line) => line.id === id);
   const next = (found ? found.qty : 0) + qty;
   if (next > product.stock || next > 5) {
-    toast(`المتوفر ${Math.min(product.stock, 5)} قطع.`);
+    toast(t("stockLeft", { n: Math.min(product.stock, 5) }));
     return false;
   }
   if (found) found.qty = next;
@@ -143,15 +157,18 @@ function shopHref(params) {
 }
 
 function navKey(route) {
+  if (route.name === "lenses") return "lenses";
   if (route.name !== "shop") return "";
   const query = route.query;
   if (query.get("deal") === "1") return "sale";
-  if (query.get("sort") === "sold" && !query.get("kind") && !query.get("audience")) return "best";
+  if (query.get("sort") === "sold" && !query.get("kind") && !query.get("audience") && !query.get("category")) return "best";
   if (query.get("audience") === "رجالي" && !query.get("kind")) return "men";
   if (query.get("audience") === "حريمي" && !query.get("kind")) return "women";
   if (query.get("audience") === "أطفال" && !query.get("kind")) return "kids";
   if (query.get("kind") === "شمسية" && !query.get("audience")) return "sun";
   if (query.get("kind") === "طبية" && !query.get("audience")) return "medical";
+  if (query.get("category") === "رياضي" && !query.get("kind") && !query.get("audience")) return "sports";
+  if (query.get("kind") === "قراءة" && !query.get("audience")) return "reading";
   return "";
 }
 
@@ -183,22 +200,20 @@ function closeSearch() {
 }
 
 function matches(product, text) {
-  const hay = [product.name, product.brand, product.category, product.kind, product.audience, product.color, product.description]
-    .join(" ")
-    .toLowerCase();
+  const hay = searchBits(product).toLowerCase();
   return text.toLowerCase().split(/\s+/).filter(Boolean).every((word) => hay.includes(word));
 }
 
 function stockLabel(stock) {
-  if (stock <= 0) return "نفد من التشكيلة";
-  if (stock <= 3) return `آخر ${stock} قطع`;
-  return "متوفر";
+  if (stock <= 0) return t("outLong");
+  if (stock <= 3) return t("lastN", { n: stock });
+  return t("available");
 }
 
 function brandLabel(brand) {
   const value = String(brand || "");
   if (value === "نظارات مسلم" || value === "مسلم" || /^(moslem|muslam|muslem)$/i.test(value)) return "Muslem";
-  return value;
+  return term(value);
 }
 
 function bestsellerIds() {
@@ -220,13 +235,13 @@ function waHref(text) {
 function openBuy(id, qty) {
   const product = byId(id);
   if (!product || product.stock <= 0) {
-    toast("هذا الإطار نفد من التشكيلة.");
+    toast(t("outToast"));
     return;
   }
   const dialog = document.getElementById("buy-choice");
   dialog.dataset.product = product.id;
   dialog.dataset.qty = String(Math.max(1, Math.min(5, Number(qty) || 1)));
-  document.getElementById("buy-choice-name").textContent = `${brandLabel(product.brand)} · ${product.name}`;
+  document.getElementById("buy-choice-name").textContent = `${brandLabel(product.brand)} · ${productName(product.name)}`;
   document.getElementById("buy-wa").hidden = true;
   document.getElementById("buy-wa-link").href = waHref("برجاء ارسال الكشف والعدسه المحدده");
   if (!dialog.open) dialog.showModal();
@@ -235,7 +250,7 @@ function openBuy(id, qty) {
 function card(product) {
   const discount = off(product);
   const gone = product.stock <= 0;
-  const best = bestsellerIds().has(product.id);
+  const best = product.badge === "bestseller" || (!product.badge && bestsellerIds().has(product.id));
   const flags = [
     best ? `<span class="flag">BESTSELLER</span>` : "",
     discount ? `<span class="flag sale">${discount}% OFF</span>` : "",
@@ -246,10 +261,10 @@ function card(product) {
       <a class="card-hit" href="#/product/${encodeURIComponent(product.id)}">
         <span class="card-visual">
           ${flags ? `<span class="flags">${flags}</span>` : ""}
-          <img src="${esc(product.image)}" alt="${esc(product.name)}">
+          <img src="${esc(product.image)}" alt="${esc(productName(product.name))}">
         </span>
         <span class="card-brand">${esc(brandLabel(product.brand))}</span>
-        <span class="card-name">${esc(product.name)}</span>
+        <span class="card-name">${esc(productName(product.name))}</span>
         <span class="card-price${discount ? " is-sale" : ""}">${discount ? `<s>${money(product.old_price)}</s>` : ""}<strong>${money(product.price)}</strong></span>
       </a>
     </article>
@@ -284,19 +299,21 @@ function filtered(route) {
 
 function shopTitle(route) {
   const query = route.query;
-  if (query.get("deal") === "1") return "عروض وخصومات";
-  if (query.get("sort") === "sold" && !query.get("kind") && !query.get("audience")) return "الأكثر مبيعاً";
-  if (query.get("audience") === "رجالي" && !query.get("kind")) return "رجالي";
-  if (query.get("audience") === "حريمي" && !query.get("kind")) return "حريمي";
-  if (query.get("sale") === "1" && !query.get("kind")) return "تخفيضات";
-  if (query.get("audience") === "أطفال") return "أطفالي";
-  if (query.get("kind") === "شمسية" && query.get("audience") === "رجالي") return "نظارات شمسية رجالي";
-  if (query.get("kind") === "شمسية" && query.get("audience") === "حريمي") return "نظارات شمسية حريمي";
-  if (query.get("kind") === "شمسية") return "النظارات الشمسية";
-  if (query.get("kind") === "طبية") return "النظارات الطبية";
-  if (query.get("brand")) return query.get("brand");
-  if (query.get("q")) return `نتائج «${query.get("q")}»`;
-  return "التشكيلة";
+  if (query.get("deal") === "1") return t("saleMenu");
+  if (query.get("sort") === "sold" && !query.get("kind") && !query.get("audience")) return t("bestsellers");
+  if (query.get("audience") === "رجالي" && !query.get("kind")) return t("men");
+  if (query.get("audience") === "حريمي" && !query.get("kind")) return t("women");
+  if (query.get("sale") === "1" && !query.get("kind")) return t("deals");
+  if (query.get("audience") === "أطفال") return t("kids");
+  if (query.get("kind") === "شمسية" && query.get("audience") === "رجالي") return t("sunMen");
+  if (query.get("kind") === "شمسية" && query.get("audience") === "حريمي") return t("sunWomen");
+  if (query.get("kind") === "شمسية") return t("sunTitle");
+  if (query.get("kind") === "طبية") return t("medicalTitle");
+  if (query.get("kind") === "قراءة") return t("reading");
+  if (query.get("category") === "رياضي" && !query.get("kind") && !query.get("audience")) return t("sports");
+  if (query.get("brand")) return term(query.get("brand"));
+  if (query.get("q")) return t("results", { q: query.get("q") });
+  return t("collection");
 }
 
 function unique(key) {
@@ -307,8 +324,34 @@ function option(value, label, current) {
   return `<option value="${esc(value)}"${value === current ? " selected" : ""}>${esc(label)}</option>`;
 }
 
+function lensesHtml() {
+  const cards = lenses.map((item) => `
+    <article class="lens-card">
+      <h2>${esc(lensLabel(item))}</h2>
+      <p>${esc(item.price ? t("lensAdded") : t("lensIncluded"))}</p>
+      ${item.price ? `<strong>+${money(item.price)}</strong>` : ""}
+    </article>
+  `).join("");
+  return `
+    <section class="wrap page">
+      <p class="kicker">LENS TYPES</p>
+      <h1>${esc(t("lensTypes"))}</h1>
+      <p class="lead">${esc(t("lensIntro"))}</p>
+      <div class="lens-list">${cards}</div>
+    </section>
+  `;
+}
+
 function homeHtml() {
-  return `<section class="wrap shop-grid"><div class="grid">${catalog.map(card).join("")}</div></section>`;
+  return `
+    <section class="vto-banner">
+      <p class="vto-kicker">3D LIVE TRY-ON</p>
+      <h2>${esc(t("vtoTitle"))}</h2>
+      <p>${esc(t("vtoBody"))}</p>
+      <a class="btn light" href="#/tryon">${esc(t("vtoCta"))}</a>
+    </section>
+    <section class="wrap shop-grid"><div class="grid">${catalog.map(card).join("")}</div></section>
+  `;
 }
 
 function shopHtml(route) {
@@ -316,7 +359,7 @@ function shopHtml(route) {
   return `
     <section class="wrap shop-grid">
       <h1 class="grid-title">${esc(shopTitle(route))}</h1>
-      ${items.length ? `<div class="grid">${items.map(card).join("")}</div>` : `<p class="empty">لا توجد إطارات في هذا القسم.</p>`}
+      ${items.length ? `<div class="grid">${items.map(card).join("")}</div>` : `<p class="empty">${esc(t("emptySection"))}</p>`}
     </section>
   `;
 }
@@ -324,40 +367,41 @@ function shopHtml(route) {
 function productHtml(id) {
   const product = byId(id);
   if (!product) {
-    return `<section class="wrap page"><h1>الإطار غير موجود</h1><p class="empty"><a href="#/shop">العودة إلى التشكيلة</a></p></section>`;
+    return `<section class="wrap page"><h1>${esc(t("missingFrame"))}</h1><p class="empty"><a href="#/shop">${esc(t("backShop"))}</a></p></section>`;
   }
   const discount = off(product);
   const related = catalog.filter((item) => item.id !== product.id && item.kind === product.kind).slice(0, 4);
+  const shown = productName(product.name);
   return `
     <section class="wrap page">
-      <nav class="crumbs" aria-label="مسار الصفحة">
-        <a href="#/">الرئيسية</a><span>/</span>
-        <a href="${shopHref({ kind: product.kind })}">${esc(product.kind)}</a><span>/</span>
-        <span>${esc(product.name)}</span>
+      <nav class="crumbs" aria-label="${esc(t("crumbs"))}">
+        <a href="#/">${esc(t("home"))}</a><span>/</span>
+        <a href="${shopHref({ kind: product.kind })}">${esc(term(product.kind))}</a><span>/</span>
+        <span>${esc(shown)}</span>
       </nav>
       <div class="pdp">
         <div class="pdp-gallery">
-          <a class="try-live" href="#/tryon/${encodeURIComponent(product.id)}">👓 التجربة الحية (افتح الكاميرا)</a>
-          <img src="${esc(product.image)}" alt="${esc(product.name)}">
+          <a class="try-live" href="#/tryon/${encodeURIComponent(product.id)}">${esc(t("tryLive"))}</a>
+          <img src="${esc(product.image)}" alt="${esc(shown)}">
         </div>
         <div class="pdp-info">
           <p class="card-brand">${esc(brandLabel(product.brand))}</p>
-          <h1>${esc(product.name)}</h1>
+          <h1>${esc(shown)}</h1>
           <div class="price-row${discount ? " is-sale" : ""}"><strong>${money(product.price)}</strong>${discount ? `<s>${money(product.old_price)}</s><span class="badge">SALE</span>` : ""}</div>
-          <p class="lead">${esc(product.description)}</p>
+          <p class="lead">${esc(productText(product.name, product.description))}</p>
           <div class="facts">
-            <span>${esc(product.color)} · ${esc(product.category)} · ${esc(product.audience)}</span>
-            <span>${stockLabel(product.stock)} · تقييم ${esc(product.rating)}</span>
-            <span>يناسب الوجه: ${esc((product.face_shapes || []).join("، "))}</span>
+            <span>${esc(term(product.color))} · ${esc(term(product.category))} · ${esc(term(product.audience))}</span>
+            <span>${esc(stockLabel(product.stock))} · ${esc(t("rating", { n: product.rating }))}</span>
+            <span>${esc(t("suits", { shapes: listJoin((product.face_shapes || []).map(term)) }))}</span>
           </div>
           <div class="buy-row">
-            <label>الكمية<input id="buy-qty" type="number" min="1" max="${Math.max(1, Math.min(product.stock, 5))}" value="1" ${product.stock ? "" : "disabled"}></label>
-            <button class="btn" type="button" data-buy="${esc(product.id)}" ${product.stock ? "" : "disabled"}>${product.stock ? "شراء" : "نفد"}</button>
+            <label>${esc(t("qty"))}<input id="buy-qty" type="number" min="1" max="${Math.max(1, Math.min(product.stock, 5))}" value="1" ${product.stock ? "" : "disabled"}></label>
+            <button class="btn" type="button" data-buy="${esc(product.id)}" ${product.stock ? "" : "disabled"}>${product.stock ? esc(t("buy")) : esc(t("soldOut"))}</button>
           </div>
-          <p class="note">بدون عدسات تنتقل إلى بيانات الشحن. العدسات الطبية تُطلب عبر واتساب المحل.</p>
+          <p class="note">${esc(t("buyNote"))}</p>
         </div>
       </div>
-      ${related.length ? `<div class="section"><div class="rail-head"><h2>إطارات قريبة</h2></div><div class="grid">${related.map(card).join("")}</div></div>` : ""}
+      ${related.length ? `<div class="section"><div class="rail-head"><h2>${esc(t("related"))}</h2></div><div class="grid">${related.map(card).join("")}</div></div>` : ""}
     </section>
   `;
 }
@@ -366,19 +410,19 @@ function lineHtml(line) {
   const product = byId(line.productId);
   const lens = lensById(line.lens);
   if (!product) {
-    return `<article class="line"><div></div><div><h3>إطار لم يعد في التشكيلة</h3><button class="textish" type="button" data-remove="${esc(line.id)}">حذف</button></div><div></div></article>`;
+    return `<article class="line"><div></div><div><h3>${esc(t("goneLine"))}</h3><button class="textish" type="button" data-remove="${esc(line.id)}">${esc(t("remove"))}</button></div><div></div></article>`;
   }
   return `
     <article class="line">
       <a href="#/product/${encodeURIComponent(product.id)}"><img src="${esc(product.image)}" alt=""></a>
       <div>
-        <h3><a href="#/product/${encodeURIComponent(product.id)}">${esc(product.name)}</a></h3>
-        <p class="muted">${esc(brandLabel(product.brand))}${lens ? ` · ${esc(lens.label)}` : ""}</p>
+        <h3><a href="#/product/${encodeURIComponent(product.id)}">${esc(productName(product.name))}</a></h3>
+        <p class="muted">${esc(brandLabel(product.brand))}${lens ? ` · ${esc(lensLabel(lens))}` : ""}</p>
         <div class="qty">
-          <button type="button" data-qty="-1" data-line="${esc(line.id)}" aria-label="تقليل">−</button>
+          <button type="button" data-qty="-1" data-line="${esc(line.id)}" aria-label="${esc(t("decrease"))}">−</button>
           <span>${line.qty}</span>
-          <button type="button" data-qty="1" data-line="${esc(line.id)}" aria-label="زيادة">+</button>
-          <button type="button" class="textish" data-remove="${esc(line.id)}">حذف</button>
+          <button type="button" data-qty="1" data-line="${esc(line.id)}" aria-label="${esc(t("increase"))}">+</button>
+          <button type="button" class="textish" data-remove="${esc(line.id)}">${esc(t("remove"))}</button>
         </div>
       </div>
       <strong class="line-price">${money(unitPrice(line) * line.qty)}</strong>
@@ -389,20 +433,20 @@ function lineHtml(line) {
 function cartHtml() {
   const lines = getCart();
   if (!lines.length) {
-    return `<section class="wrap page"><p class="kicker">BAG</p><h1>السلة فارغة</h1><p class="empty">اختر إطاراً من التشكيلة أو جرّبه على وجهك أولاً.</p><a class="btn" href="#/shop">تسوق التشكيلة</a></section>`;
+    return `<section class="wrap page"><p class="kicker">BAG</p><h1>${esc(t("emptyCart"))}</h1><p class="empty">${esc(t("emptyCartBody"))}</p><a class="btn" href="#/shop">${esc(t("shopCollection"))}</a></section>`;
   }
   return `
     <section class="wrap page">
       <p class="kicker">BAG</p>
-      <h1>السلة</h1>
+      <h1>${esc(t("bagTitle"))}</h1>
       <div class="layout" style="margin-top:22px">
         <div>${lines.map(lineHtml).join("")}</div>
         <aside class="summary">
-          <h2>الملخص</h2>
-          <div><span>الإطارات</span><strong>${money(cartSubtotal())}</strong></div>
-          <p class="muted">رسوم التوصيل تُضاف في الخطوة التالية حسب المحافظة.</p>
-          <a class="btn block" href="#/checkout">إتمام الطلب</a>
-          <a class="text-link" href="#/shop">متابعة التسوق</a>
+          <h2>${esc(t("summary"))}</h2>
+          <div><span>${esc(t("frames"))}</span><strong>${money(cartSubtotal())}</strong></div>
+          <p class="muted">${esc(t("shipNext"))}</p>
+          <a class="btn block" href="#/checkout">${esc(t("checkout"))}</a>
+          <a class="text-link" href="#/shop">${esc(t("continueShop"))}</a>
         </aside>
       </div>
     </section>
@@ -414,39 +458,39 @@ function checkoutHtml() {
   if (!lines.length) return cartHtml();
   const missing = lines.some((line) => !byId(line.productId));
   const medical = lines.some((line) => line.lens && line.lens !== "none" && byId(line.productId)?.kind === "طبية");
-  const gov = governorates.map((item) => `<option value="${esc(item.name)}">${esc(item.name)} · ${money(item.fee)}</option>`).join("");
-  const pays = payments.map((item, index) => `<label><span><input type="radio" name="payment" value="${esc(item.id)}" ${index === 0 ? "checked" : ""}> ${esc(item.label)}</span></label>`).join("");
+  const gov = governorates.map((item) => `<option value="${esc(item.name)}">${esc(govLabel(item.name))} · ${money(item.fee)}</option>`).join("");
+  const pays = payments.map((item, index) => `<label><span><input type="radio" name="payment" value="${esc(item.id)}" ${index === 0 ? "checked" : ""}> ${esc(payLabel(item))}</span></label>`).join("");
   return `
     <section class="wrap page">
       <p class="kicker">CHECKOUT</p>
-      <h1>إتمام الطلب</h1>
+      <h1>${esc(t("checkout"))}</h1>
       <div class="layout" style="margin-top:22px">
         <form class="stack" id="checkout">
-          ${missing ? `<p class="form-error">في السلة إطار لم يعد متاحاً. احذفه قبل المتابعة.</p>` : ""}
-          <label>الاسم<input name="name" autocomplete="name" required placeholder="الاسم الثلاثي"></label>
-          <label>الهاتف<input name="phone" autocomplete="tel" inputmode="tel" required placeholder="01xxxxxxxxx"></label>
-          <label>المحافظة<select name="governorate" id="gov">${gov}</select></label>
-          <label>العنوان<textarea name="address" required placeholder="الشارع، العلامة، رقم العمارة"></textarea></label>
-          <fieldset class="lenses"><legend class="kicker">الدفع</legend>${pays}</fieldset>
+          ${missing ? `<p class="form-error">${esc(t("missingCart"))}</p>` : ""}
+          <label>${esc(t("name"))}<input name="name" autocomplete="name" required placeholder="${esc(t("namePh"))}"></label>
+          <label>${esc(t("phone"))}<input name="phone" autocomplete="tel" inputmode="tel" required placeholder="01xxxxxxxxx"></label>
+          <label>${esc(t("gov"))}<select name="governorate" id="gov">${gov}</select></label>
+          <label>${esc(t("address"))}<textarea name="address" required placeholder="${esc(t("addressPh"))}"></textarea></label>
+          <fieldset class="lenses"><legend class="kicker">${esc(t("payment"))}</legend>${pays}</fieldset>
           <div class="pay-box" id="pay-box" hidden>
             <p id="pay-help"></p>
-            <label style="margin-top:8px">رقم العملية<input name="reference" placeholder="رقم التحويل"></label>
+            <label style="margin-top:8px">${esc(t("transferRef"))}<input name="reference" placeholder="${esc(t("refPh"))}"></label>
           </div>
           ${medical ? `
             <div class="measures">
-              <h3>مقاس الروشتة، إن وُجد</h3>
-              <label>العين اليمنى SPH<input name="od_sph" inputmode="decimal" placeholder="0.00"></label>
-              <label>العين اليسرى SPH<input name="os_sph" inputmode="decimal" placeholder="0.00"></label>
-              <label>اليمنى CYL<input name="od_cyl" inputmode="decimal" placeholder="0.00"></label>
-              <label>اليسرى CYL<input name="os_cyl" inputmode="decimal" placeholder="0.00"></label>
-              <label>اليمنى AXIS<input name="od_axis" inputmode="numeric" placeholder="0"></label>
-              <label>اليسرى AXIS<input name="os_axis" inputmode="numeric" placeholder="0"></label>
+              <h3>${esc(t("rxTitle"))}</h3>
+              <label>${esc(t("odSph"))}<input name="od_sph" inputmode="decimal" placeholder="0.00"></label>
+              <label>${esc(t("osSph"))}<input name="os_sph" inputmode="decimal" placeholder="0.00"></label>
+              <label>${esc(t("odCyl"))}<input name="od_cyl" inputmode="decimal" placeholder="0.00"></label>
+              <label>${esc(t("osCyl"))}<input name="os_cyl" inputmode="decimal" placeholder="0.00"></label>
+              <label>${esc(t("odAxis"))}<input name="od_axis" inputmode="numeric" placeholder="0"></label>
+              <label>${esc(t("osAxis"))}<input name="os_axis" inputmode="numeric" placeholder="0"></label>
             </div>
-            <p class="muted">يمكن ترك المقاس فارغاً وإرسال صورة الروشتة على واتساب بعد الطلب. العدسة لا تُقص قبل المراجعة.</p>
+            <p class="muted">${esc(t("rxNote"))}</p>
           ` : ""}
-          <label>ملاحظة<textarea name="note" placeholder="موعد مفضّل، أو تفصيل للعنوان"></textarea></label>
+          <label>${esc(t("note"))}<textarea name="note" placeholder="${esc(t("notePh"))}"></textarea></label>
           <p class="form-error" id="checkout-error" hidden></p>
-          <button class="btn" id="place" type="submit">تأكيد الطلب</button>
+          <button class="btn" id="place" type="submit">${esc(t("placeOrder"))}</button>
         </form>
         <aside class="summary" id="summary"></aside>
       </div>
@@ -490,14 +534,14 @@ function rememberOrder(data, lines) {
   const id = `MO-${Math.random().toString(16).slice(2, 8).toUpperCase()}`;
   const payment = payments.find((item) => item.id === data.payment);
   const text = [
-    "مرحباً، أتممت طلباً من مسلم - Muslem Optics.",
-    `رقم الطلب: ${id}`,
-    `الاسم: ${data.name}`,
-    `الهاتف: ${data.phone}`,
-    `العنوان: ${data.address} — ${data.governorate}`,
+    t("waHello"),
+    t("waOrder", { id }),
+    t("waName", { name: data.name }),
+    t("waPhone", { phone: data.phone }),
+    t("waAddress", { address: data.address, gov: govLabel(data.governorate) }),
     ...detailed.map((line) => `${line.name} × ${line.qty}${line.lens_label ? ` (${line.lens_label})` : ""}`),
-    `الإجمالي: ${subtotal + Number(ship.fee || 0)} جنيه`,
-    data.note ? `ملاحظة: ${data.note}` : "",
+    t("waTotal", { total: subtotal + Number(ship.fee || 0) }),
+    data.note ? t("waNote", { note: data.note }) : "",
   ].filter(Boolean).join("\n");
   const digits = String(shop.phone || "01148005679").replace(/\D/g, "");
   const waPhone = digits.startsWith("0") ? `2${digits}` : digits;
@@ -529,15 +573,15 @@ function paintSummary() {
   const ship = feeFor(govName);
   const subtotal = cartSubtotal();
   box.innerHTML = `
-    <h2>طلبك</h2>
+    <h2>${esc(t("yourOrder"))}</h2>
     ${getCart().map((line) => {
       const product = byId(line.productId);
-      return `<div><span>${esc(product?.name || "إطار")} × ${line.qty}</span><span>${money(unitPrice(line) * line.qty)}</span></div>`;
+      return `<div><span>${esc(product ? productName(product.name) : t("frameFallback"))} × ${line.qty}</span><span>${money(unitPrice(line) * line.qty)}</span></div>`;
     }).join("")}
-    <div class="sum-row"><span>الإطارات</span><span>${money(subtotal)}</span></div>
-    <div class="sum-row"><span>التوصيل إلى ${esc(govName || "")}</span><span>${money(ship.fee)}</span></div>
-    <div class="sum-row total"><span>الإجمالي</span><span>${money(subtotal + ship.fee)}</span></div>
-    <p class="muted">الوصول المتوقع: ${esc(ship.eta)}</p>
+    <div class="sum-row"><span>${esc(t("frames"))}</span><span>${money(subtotal)}</span></div>
+    <div class="sum-row"><span>${esc(t("deliverTo", { gov: govLabel(govName || "") }))}</span><span>${money(ship.fee)}</span></div>
+    <div class="sum-row total"><span>${esc(t("total"))}</span><span>${money(subtotal + ship.fee)}</span></div>
+    <p class="muted">${esc(t("eta", { eta: etaLabel(ship.eta) }))}</p>
   `;
 }
 
@@ -550,8 +594,8 @@ function bindCheckout() {
   const describe = () => {
     const method = new FormData(form).get("payment");
     box.hidden = method === "cod";
-    if (method === "instapay") help.textContent = `حوّل إلى InstaPay: ${shop.instapay} ثم اكتب رقم العملية.`;
-    if (method === "vodafone") help.textContent = `حوّل فودافون كاش إلى ${shop.vodafone} ثم اكتب رقم العملية.`;
+    if (method === "instapay") help.textContent = t("instapayHelp", { account: shop.instapay });
+    if (method === "vodafone") help.textContent = t("vodafoneHelp", { account: shop.vodafone });
   };
   form.addEventListener("change", () => {
     describe();
@@ -565,7 +609,7 @@ function bindCheckout() {
     const data = Object.fromEntries(new FormData(form).entries());
     const lines = getCart();
     if (!lines.length || lines.some((line) => !byId(line.productId))) {
-      error.textContent = "راجع السلة قبل تأكيد الطلب.";
+      error.textContent = t("reviewCart");
       error.hidden = false;
       return;
     }
@@ -623,39 +667,39 @@ function bindCheckout() {
 
 function orderHtml(order, fresh) {
   const step = Math.max(0, STEPS.indexOf(order.status));
-  const measureText = order.measures ? `مقاس مرفق مع الطلب.` : "";
+  const measureText = order.measures ? t("measureAttached") : "";
   return `
     <section class="wrap page">
       <p class="kicker">${fresh ? "THANK YOU" : "ORDER"}</p>
-      <h1>${fresh ? "استلمنا طلبك" : "حالة الطلب"}</h1>
+      <h1>${esc(fresh ? t("received") : t("orderStatus"))}</h1>
       <p class="order-id">${esc(order.id)}</p>
-      <p>${fresh ? "سيجهز المحل الطلب من باب اللوق. احتفظ برقم الطلب لتتبعه." : `بتاريخ ${esc(order.created)}`}</p>
-      <div class="steps">${STEPS.map((label, index) => `<span class="${index <= step ? "is-on" : ""}">${esc(label)}</span>`).join("")}</div>
+      <p>${fresh ? esc(t("receivedBody")) : esc(t("orderedOn", { date: order.created }))}</p>
+      <div class="steps">${STEPS.map((label, index) => `<span class="${index <= step ? "is-on" : ""}">${esc(term(label))}</span>`).join("")}</div>
       <div class="layout">
         <div>
           ${(order.lines || []).map((line) => `
             <article class="line">
               <img src="${esc(line.image || "")}" alt="">
               <div>
-                <h3>${esc(line.name)}</h3>
-                <p class="muted">${esc(line.lens_label || "")} · الكمية ${esc(line.qty)}</p>
+                <h3>${esc(productName(line.name))}</h3>
+                <p class="muted">${esc(term(line.lens_label || ""))} · ${esc(t("qtyLine", { n: line.qty }))}</p>
               </div>
               <strong>${money(line.price * line.qty)}</strong>
             </article>
           `).join("")}
         </div>
         <aside class="summary">
-          <h2>التسليم</h2>
+          <h2>${esc(t("handover"))}</h2>
           <p>${esc(order.name)}</p>
           <p>${esc(order.phone)}</p>
-          <p>${esc(order.address)} — ${esc(order.governorate)}</p>
-          <p class="muted">الوصول المتوقع: ${esc(order.eta)}</p>
-          <div class="sum-row"><span>الإطارات</span><span>${money(order.subtotal)}</span></div>
-          <div class="sum-row"><span>التوصيل</span><span>${money(order.fee)}</span></div>
-          <div class="sum-row total"><span>الإجمالي</span><span>${money(order.total)}</span></div>
-          <p>الدفع: ${esc(order.payment)}${order.payment_ref ? ` · ${esc(order.payment_ref)}` : ""}</p>
-          ${measureText ? `<p class="muted">${measureText}</p>` : ""}
-          ${order.whatsapp ? `<a class="btn block" href="${esc(order.whatsapp)}" target="_blank" rel="noopener">إرسال الطلب على واتساب</a>` : ""}
+          <p>${esc(order.address)} — ${esc(govLabel(order.governorate))}</p>
+          <p class="muted">${esc(t("eta", { eta: etaLabel(order.eta) }))}</p>
+          <div class="sum-row"><span>${esc(t("frames"))}</span><span>${money(order.subtotal)}</span></div>
+          <div class="sum-row"><span>${esc(t("shipFee"))}</span><span>${money(order.fee)}</span></div>
+          <div class="sum-row total"><span>${esc(t("total"))}</span><span>${money(order.total)}</span></div>
+          <p>${esc(t("payLine", { method: term(order.payment) }))}${order.payment_ref ? ` · ${esc(order.payment_ref)}` : ""}</p>
+          ${measureText ? `<p class="muted">${esc(measureText)}</p>` : ""}
+          ${order.whatsapp ? `<a class="btn block" href="${esc(order.whatsapp)}" target="_blank" rel="noopener">${esc(t("sendOrder"))}</a>` : ""}
         </aside>
       </div>
     </section>
@@ -669,7 +713,7 @@ function showOrder(order) {
 }
 
 async function renderOrder(id, token) {
-  document.title = "الطلب | مسلم";
+  document.title = t("docTitle", { title: t("orderStatus") });
   const saved = readSavedOrder(id);
   try {
     const response = await fetch(`/api/orders/${encodeURIComponent(id)}`);
@@ -692,103 +736,105 @@ async function renderOrder(id, token) {
     showOrder(saved);
     return;
   }
-  view.innerHTML = `<section class="wrap page"><h1>لا يوجد طلب بهذا الرقم</h1><p class="empty">تأكد من الرقم، مثل MO-AB12CD.</p><a class="btn" href="#/track">تتبّع طلب</a></section>`;
+  view.innerHTML = `<section class="wrap page"><h1>${esc(t("noOrder"))}</h1><p class="empty">${esc(t("noOrderBody"))}</p><a class="btn" href="#/track">${esc(t("trackCta"))}</a></section>`;
 }
 
 function prose(kicker, title, body) {
-  document.title = `${title} | مسلم`;
-  return `<article class="wrap prose"><p class="kicker">${kicker}</p><h1>${title}</h1>${body}</article>`;
+  document.title = t("docTitle", { title });
+  return `<article class="wrap prose"><p class="kicker">${esc(kicker)}</p><h1>${esc(title)}</h1>${body}</article>`;
 }
 
 function pageHtml(name) {
   const phone = esc(shop.phone || "");
   const wa = esc(shop.whatsapp || "#");
   if (name === "about") {
-    return prose("THE SHOP", "عن مسلم", `
-      <p>مسلم - Muslem Optics محل نظارات في باب اللوق بالقاهرة. هذا الموقع واجهة المحل نفسه: الإطارات المعروضة تُختار وتُشحن منه، وليست سوقاً لمحلات أخرى.</p>
-      <p>تجد في التشكيلة نظارات طبية وشمسية للرجال والنساء والأطفال، وبعض الماركات الموجودة داخل المحل مثل أوكلي وبوليس إلى جانب إطارات مسلم.</p>
-      <p>يمكن تجربة الإطار على الوجه بالكاميرا قبل الطلب. الصورة تُعالج في متصفحك ولا تُرفع إلينا.</p>
+    return prose("THE SHOP", t("aboutTitle"), `
+      <p>${esc(t("aboutP1"))}</p>
+      <p>${esc(t("aboutP2"))}</p>
+      <p>${esc(t("aboutP3"))}</p>
     `);
   }
   if (name === "shipping") {
-    const rows = governorates.map((item) => `<tr><td>${esc(item.name)}</td><td>${money(item.fee)}</td><td>${esc(item.eta)}</td></tr>`).join("");
-    return prose("DELIVERY", "الشحن والتوصيل", `
-      <p>يخرج الطلب من باب اللوق. الرسوم تقديرية وتظهر في صفحة الإتمام قبل التأكيد.</p>
-      <table class="table"><thead><tr><th>المحافظة</th><th>الرسوم</th><th>الوصول المتوقع</th></tr></thead><tbody>${rows}</tbody></table>
+    const rows = governorates.map((item) => `<tr><td>${esc(govLabel(item.name))}</td><td>${money(item.fee)}</td><td>${esc(etaLabel(item.eta))}</td></tr>`).join("");
+    return prose("DELIVERY", t("shippingTitle"), `
+      <p>${esc(t("shipIntro"))}</p>
+      <table class="table"><thead><tr><th>${esc(t("govCol"))}</th><th>${esc(t("feeCol"))}</th><th>${esc(t("etaCol"))}</th></tr></thead><tbody>${rows}</tbody></table>
     `);
   }
   if (name === "returns") {
-    return prose("RETURNS", "الاستبدال والإرجاع", `
-      <p>يمكن طلب استبدال الإطار خلال 14 يوماً إذا كان بحالته الأصلية ومن غير خدش أو تعديل.</p>
-      <p>العدسة الطبية التي قُصّت على مقاس الروشتة لا تُستبدل إلا إذا كان الخطأ من المحل في تنفيذ المقاس.</p>
-      <p>لبدء طلب، أرسل رقم الطلب على واتساب <a href="${wa}" target="_blank" rel="noopener">${phone}</a>.</p>
+    return prose("RETURNS", t("returnsTitle"), `
+      <p>${esc(t("returnsP1"))}</p>
+      <p>${esc(t("returnsP2"))}</p>
+      <p>${t("returnsP3", { phone: `<a href="${wa}" target="_blank" rel="noopener">${phone}</a>` })}</p>
     `);
   }
   if (name === "faq") {
-    return prose("FAQ", "الأسئلة الشائعة", `
-      <h2>هل التجربة الحية ترفع صورتي؟</h2>
-      <p>لا. الكاميرا وتتبع الوجه يعملان داخل المتصفح، واللقطة التي تحفظها تبقى على جهازك.</p>
-      <h2>كيف أرسل الروشتة؟</h2>
-      <p>اكتب المقاس عند إتمام الطلب، أو أرسل صورة الروشتة على واتساب مع رقم الطلب قبل قص العدسة.</p>
-      <h2>ما طرق الدفع؟</h2>
-      <p>الدفع عند الاستلام، أو InstaPay على ${esc(shop.instapay || "")}، أو فودافون كاش على ${phone}.</p>
-      <h2>من أين يصل الطلب؟</h2>
-      <p>من مسلم - Muslem Optics في ${esc(shop.address || "باب اللوق")}. لا يوجد تجار آخرون على الموقع.</p>
+    return prose("FAQ", t("faqTitle"), `
+      <h2>${esc(t("faqCamQ"))}</h2>
+      <p>${esc(t("faqCamA"))}</p>
+      <h2>${esc(t("faqRxQ"))}</h2>
+      <p>${esc(t("faqRxA"))}</p>
+      <h2>${esc(t("faqPayQ"))}</h2>
+      <p>${esc(t("faqPayA", { account: shop.instapay || "", phone: shop.phone || "" }))}</p>
+      <h2>${esc(t("faqFromQ"))}</h2>
+      <p>${esc(t("faqFromA", { address: shopAddress(shop.address || "باب اللوق") }))}</p>
     `);
   }
   if (name === "contact") {
-    return prose("VISIT", "تواصل معنا", `
-      <p>العنوان: ${esc(shop.address || "")}</p>
-      <p>الهاتف: <a href="tel:${phone}">${phone}</a></p>
-      <p><a href="${wa}" target="_blank" rel="noopener">واتساب</a></p>
-      <p><a href="${esc(shop.instagram || "#")}" target="_blank" rel="noopener">إنستغرام</a></p>
-      <p><a href="${esc(shop.facebook || "#")}" target="_blank" rel="noopener">فيسبوك</a></p>
+    return prose("VISIT", t("contactTitle"), `
+      <p>${esc(t("addressLabel", { address: shopAddress(shop.address || "") }))}</p>
+      <p>${t("phoneLabel", { phone: `<a href="tel:${phone}">${phone}</a>` })}</p>
+      <p><a href="${wa}" target="_blank" rel="noopener">${esc(t("whatsapp"))}</a></p>
+      <p><a href="${esc(shop.instagram || "#")}" target="_blank" rel="noopener">${esc(t("instagram"))}</a></p>
+      <p><a href="${esc(shop.facebook || "#")}" target="_blank" rel="noopener">${esc(t("facebook"))}</a></p>
     `);
   }
   if (name === "privacy") {
-    return prose("PRIVACY", "الخصوصية", `
-      <p>نحفظ بيانات الطلب التي تكتبها: الاسم والهاتف والعنوان ومحتوى السلة، حتى نجهّز الشحنة من المحل. تبقى هذه البيانات على جهاز تشغيل المتجر.</p>
-      <p>صورة الكاميرا في التجربة الحية لا تُرسل إلى الخادم. نموذج تتبع الوجه يُحمَّل في متصفحك من خدمة MediaPipe.</p>
+    return prose("PRIVACY", t("privacyTitle"), `
+      <p>${esc(t("privacyP1"))}</p>
+      <p>${esc(t("privacyP2"))}</p>
     `);
   }
   if (name === "terms") {
-    return prose("TERMS", "الشروط", `
-      <p>الأسعار بالجنيه المصري وتشمل الإطار والعدسة المختارة، ولا تشمل التوصيل إلا بعد اختيار المحافظة.</p>
-      <p>المخزون يُحدَّث عند تأكيد الطلب. إذا نفدت الكمية قبل التأكيد تظهر رسالة ولن يُخصم المبلغ من المخزون.</p>
-      <p>الموقع خاص بمسلم - Muslem Optics في باب اللوق، وليس منصة لتسجيل محلات.</p>
+    return prose("TERMS", t("termsTitle"), `
+      <p>${esc(t("termsP1"))}</p>
+      <p>${esc(t("termsP2"))}</p>
+      <p>${esc(t("termsP3"))}</p>
     `);
   }
-  return prose("404", "الصفحة غير موجودة", `<p><a href="#/">العودة إلى الرئيسية</a></p>`);
+  return prose("404", t("notFound"), `<p><a href="#/">${esc(t("backHome"))}</a></p>`);
 }
 
 function render(route, token) {
   const titles = {
-    home: "مسلم | Muslem Optics",
-    shop: `${shopTitle(route)} | مسلم`,
-    product: "الإطار | مسلم",
-    cart: "السلة | مسلم",
-    checkout: "إتمام الطلب | مسلم",
-    track: "تتبّع الطلب | مسلم",
-    tryon: "التجربة الحية | مسلم",
+    home: t("homeTitle"),
+    shop: t("docTitle", { title: shopTitle(route) }),
+    product: t("frameTitle"),
+    cart: t("docTitle", { title: t("bagTitle") }),
+    checkout: t("docTitle", { title: t("checkout") }),
+    track: t("docTitle", { title: t("track") }),
+    tryon: t("docTitle", { title: t("tryon") }),
+    lenses: t("docTitle", { title: t("lensTypes") }),
   };
   if (titles[route.name]) document.title = titles[route.name];
   if (route.name === "home") return homeHtml();
   if (route.name === "shop") return shopHtml(route);
   if (route.name === "product") {
     const product = byId(route.id);
-    if (product) document.title = `${product.name} | مسلم`;
+    if (product) document.title = t("docTitle", { title: productName(product.name) });
     return productHtml(route.id);
   }
   if (route.name === "cart") return cartHtml();
   if (route.name === "checkout") return checkoutHtml();
   if (route.name === "order") {
     renderOrder(route.id, token);
-    return `<section class="wrap page"><p class="loading">جاري جلب الطلب…</p></section>`;
+    return `<section class="wrap page"><p class="loading">${esc(t("loadingOrder"))}</p></section>`;
   }
   if (route.name === "track") {
-    return `<section class="wrap page"><p class="kicker">TRACK</p><h1>تتبّع الطلب</h1><form class="stack" id="track" style="max-width:460px;margin-top:18px"><label>رقم الطلب<input name="id" required placeholder="MO-AB12CD" value="${esc(route.query.get("id") || "")}"></label><button class="btn" type="submit">عرض الحالة</button></form></section>`;
+    return `<section class="wrap page"><p class="kicker">TRACK</p><h1>${esc(t("track"))}</h1><form class="stack" id="track" style="max-width:460px;margin-top:18px"><label>${esc(t("orderNumber"))}<input name="id" required placeholder="MO-AB12CD" value="${esc(route.query.get("id") || "")}"></label><button class="btn" type="submit">${esc(t("showStatus"))}</button></form></section>`;
   }
   if (route.name === "tryon") return `<div id="try-root"></div>`;
+  if (route.name === "lenses") return lensesHtml();
   return pageHtml(route.name);
 }
 
@@ -811,7 +857,7 @@ function bind(route, token) {
       lenses,
       money,
       onAdd(product, lens) {
-        if (addToCart(product, lens, 1)) toast(`أُضيف ${esc(product.name)} إلى السلة. <a href="#/cart">عرض السلة</a>`);
+        if (addToCart(product, lens, 1)) toast(`${esc(t("added", { name: productName(product.name) }))} <a href="#/cart">${esc(t("viewBag"))}</a>`);
       },
     });
     return () => {
@@ -822,11 +868,11 @@ function bind(route, token) {
   return null;
 }
 
-function show({ scroll = true } = {}) {
+function show({ scroll = true, force = false } = {}) {
   const token = ++viewToken;
   const route = parseRoute();
   setMenu(false);
-  if (tryonApi && route.name === "tryon") {
+  if (!force && tryonApi && route.name === "tryon") {
     tryonApi.select(route.id);
     refreshChrome(route);
     closeSearch();
@@ -855,13 +901,18 @@ function renderSearch(text) {
   list.innerHTML = found.map((item) => `
     <a href="#/product/${encodeURIComponent(item.id)}">
       <img src="${esc(item.image)}" alt="">
-      <span>${esc(item.name)}<br><small class="muted">${esc(brandLabel(item.brand))}</small></span>
+      <span>${esc(productName(item.name))}<br><small class="muted">${esc(brandLabel(item.brand))}</small></span>
       <em>${money(item.price)}</em>
     </a>
-  `).join("") + `<a class="search-all" href="${shopHref({ q })}">عرض كل النتائج</a>`;
+  `).join("") + `<a class="search-all" href="${shopHref({ q })}">${esc(t("searchAll"))}</a>`;
 }
 
 function bootChrome() {
+  document.body.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-set-lang]");
+    if (!button || button.dataset.setLang === getLang()) return;
+    setLang(button.dataset.setLang);
+  });
   document.getElementById("open-menu").addEventListener("click", () => setMenu(true));
   document.getElementById("close-menu").addEventListener("click", () => setMenu(false));
   document.getElementById("menu-scrim").addEventListener("click", () => setMenu(false));
@@ -911,7 +962,7 @@ function bootChrome() {
       const product = byId(add.dataset.add);
       if (!product) return;
       const lens = product.kind === "طبية" ? "plain" : "none";
-      if (addToCart(product, lens, 1)) toast(`أُضيف ${esc(product.name)} إلى السلة. <a href="#/cart">عرض السلة</a>`);
+      if (addToCart(product, lens, 1)) toast(`${esc(t("added", { name: productName(product.name) }))} <a href="#/cart">${esc(t("viewBag"))}</a>`);
       return;
     }
     const qty = event.target.closest("[data-qty]");
@@ -955,14 +1006,23 @@ async function loadBootstrap() {
   return await response.json();
 }
 
+let ready = false;
+
 async function boot() {
+  applyDocument();
+  onLang(() => {
+    document.getElementById("buy-choice")?.close();
+    closeSearch();
+    if (ready) show({ scroll: false, force: true });
+  });
   bootChrome();
   try {
     applyBootstrap(await loadBootstrap());
   } catch {
-    view.innerHTML = `<section class="wrap page"><h1>تعذر فتح التشكيلة</h1><p class="empty">أعد تشغيل المتجر من ملف run.bat ثم حدّث الصفحة.</p></section>`;
+    view.innerHTML = `<section class="wrap page"><h1>${esc(t("catalogFail"))}</h1><p class="empty">${esc(t("catalogFailBody"))}</p></section>`;
     return;
   }
+  ready = true;
   if (!location.hash) location.hash = "#/";
   else show();
 }

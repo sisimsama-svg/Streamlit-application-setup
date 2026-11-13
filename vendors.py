@@ -55,7 +55,7 @@ def _moslem_record() -> dict:
     return {
         "id": PRIMARY_STORE,
         "name": "نظارات مسلم",
-        "name_en": "Moslem Optics",
+        "name_en": "Muslem Optics",
         "logo": "",
         "cover": "",
         "whatsapp": OFFICIAL_WHATSAPP,

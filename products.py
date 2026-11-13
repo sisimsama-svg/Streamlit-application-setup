@@ -13,7 +13,7 @@ CATALOG_PATH = data_dir() / "catalog.json"
 
 CATALOG_VERSION = 3
 CATEGORIES = ["كلاسيك", "دائري", "أفياتور", "كات آي", "رياضي", "مربع", "بيضاوي", "شفاف"]
-KINDS = ["طبية", "شمسية"]
+KINDS = ["طبية", "شمسية", "قراءة"]
 AUDIENCES = ["رجالي", "حريمي", "أطفال", "للجميع"]
 FACE_SHAPES = ["دائري", "مربع", "بيضاوي", "مستطيل", "قلب"]
 CATEGORY_SHAPES = {
@@ -409,7 +409,10 @@ def load_products() -> list[dict]:
 def save_products(items: list[dict]) -> None:
     CATALOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     payload = {"version": CATALOG_VERSION, "products": items}
-    CATALOG_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    CATALOG_PATH.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
 
 def get_product(product_id: str) -> dict | None:

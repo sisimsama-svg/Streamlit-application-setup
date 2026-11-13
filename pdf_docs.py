@@ -144,7 +144,7 @@ class _Writer:
         self.rtl = lang() != "en"
         self.buffer = io.BytesIO()
         self.canvas = canvas.Canvas(self.buffer, pagesize=A4)
-        self.canvas.setTitle("Moslem Optics")
+        self.canvas.setTitle("Muslem Optics")
         self.canvas.setAuthor("نظارات مسلم")
         self.page = 0
         self.y = 0.0
@@ -165,7 +165,7 @@ class _Writer:
         pen.setFont(FONT_NAME, 20)
         pen.drawRightString(RIGHT, PAGE_H - 34, _shape("نظارات مسلم"))
         pen.setFont(FONT_NAME, 10)
-        pen.drawRightString(RIGHT, PAGE_H - 52, "Moslem Optics")
+        pen.drawRightString(RIGHT, PAGE_H - 52, "Muslem Optics")
         pen.drawRightString(RIGHT, PAGE_H - 68, _shape("باب اللوق، القاهرة  ·  Bab El Louk, Cairo"))
         pen.setFillColor(INK)
         pen.setFont(FONT_NAME, 15)
@@ -181,7 +181,7 @@ class _Writer:
         pen.rect(0, 0, PAGE_W, 24, stroke=0, fill=1)
         pen.setFillColor(WHITE)
         pen.setFont(FONT_NAME, 8)
-        pen.drawCentredString(PAGE_W / 2, 9, _shape("نظارات مسلم  ·  Moslem Optics  ·  Bab El Louk"))
+        pen.drawCentredString(PAGE_W / 2, 9, _shape("نظارات مسلم  ·  Muslem Optics  ·  Bab El Louk"))
         self.y = PAGE_H - 146
 
     def ensure(self, need: float) -> None:

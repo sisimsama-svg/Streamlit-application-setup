@@ -13,68 +13,82 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <a class="skip" href="#view">تخطَّ إلى المحتوى</a>
+  <a class="skip" href="#view" data-i18n="skip">تخطَّ إلى المحتوى</a>
   <div class="sticky-top">
-    <div class="announce">توصيل من باب اللوق إلى كل المحافظات · خصومات 25%–50%</div>
+    <div class="announce" data-i18n="announce">توصيل من باب اللوق إلى كل المحافظات · خصومات 25%–50%</div>
     <header class="header">
-      <button type="button" class="menu-btn" id="open-menu" aria-expanded="false" aria-controls="side-menu" aria-label="القائمة">
+      <button type="button" class="menu-btn" id="open-menu" aria-expanded="false" aria-controls="side-menu" data-i18n-aria="menu" aria-label="القائمة">
         <span></span><span></span><span></span>
       </button>
       <a class="logo" href="#/">Muslem Optics</a>
-      <a class="icon-btn cart-link" href="#/cart" aria-label="السلة">
+      <div class="lang-switch" role="group" data-i18n-aria="language" aria-label="اللغة">
+        <button type="button" data-set-lang="ar" aria-pressed="true">عربي</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="icon-btn cart-link" href="#/cart" data-i18n-aria="cart" aria-label="السلة">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.2 7.2h14.2l-1.3 8.1a1 1 0 0 1-1 .8H8.6a1 1 0 0 1-1-.8L6.2 7.2Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6.2 7.2 5.2 4.2H2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="19.6" r="1.15" fill="currentColor"/><circle cx="17.2" cy="19.6" r="1.15" fill="currentColor"/></svg>
         <span id="cart-count" hidden>0</span>
       </a>
     </header>
   </div>
   <div class="scrim" id="menu-scrim" hidden></div>
-  <aside id="side-menu" class="side-menu" aria-label="التصنيفات">
+  <aside id="side-menu" class="side-menu" data-i18n-aria="categories" aria-label="التصنيفات">
     <div class="side-head">
-      <button type="button" id="close-menu" aria-label="إغلاق">×</button>
-      <button type="button" class="side-search" id="open-search">بحث</button>
+      <button type="button" id="close-menu" data-i18n-aria="close" aria-label="إغلاق">×</button>
+      <button type="button" class="side-search" id="open-search" data-i18n="search">بحث</button>
+    </div>
+    <div class="side-lang">
+      <span data-i18n="language">اللغة</span>
+      <div class="lang-switch" role="group" data-i18n-aria="language" aria-label="اللغة">
+        <button type="button" data-set-lang="ar" aria-pressed="true">عربي</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </div>
     </div>
     <nav>
-      <a href="#/shop?audience=رجالي" data-nav="men"><span>رجالي</span><small>MEN</small></a>
-      <a href="#/shop?audience=حريمي" data-nav="women"><span>حريمي</span><small>WOMEN</small></a>
-      <a href="#/shop?audience=أطفال" data-nav="kids"><span>أطفالي</span><small>KIDS</small></a>
-      <a href="#/shop?kind=شمسية" data-nav="sun"><span>نظارات شمسية</span></a>
-      <a href="#/shop?kind=طبية" data-nav="medical"><span>نظارات طبية</span></a>
-      <a href="#/shop?sort=sold" data-nav="best"><span>الأكثر مبيعاً</span><small>BESTSELLERS</small></a>
-      <a href="#/shop?deal=1" data-nav="sale"><span>عروض وخصومات</span><small>25%–50% OFF</small></a>
+      <a href="#/shop?audience=رجالي" data-nav="men"><span data-i18n="men">رجالي</span><small>MEN</small></a>
+      <a href="#/shop?audience=حريمي" data-nav="women"><span data-i18n="women">حريمي</span><small>WOMEN</small></a>
+      <a href="#/shop?audience=أطفال" data-nav="kids"><span data-i18n="kids">أطفالي</span><small>KIDS</small></a>
+      <a href="#/shop?kind=شمسية" data-nav="sun"><span data-i18n="sun">نظارات شمسية</span></a>
+      <a href="#/shop?kind=طبية" data-nav="medical"><span data-i18n="medical">نظارات طبية</span></a>
+      <a href="#/shop?category=رياضي" data-nav="sports"><span data-i18n="sports">نظارات رياضية</span><small>SPORTS</small></a>
+      <a href="#/shop?kind=قراءة" data-nav="reading"><span data-i18n="reading">نظارات قراءة</span><small>READING GLASSES</small></a>
+      <a href="#/lenses" data-nav="lenses"><span data-i18n="lensTypes">أنواع العدسات</span><small>LENS TYPES</small></a>
+      <a href="#/shop?sort=sold" data-nav="best"><span data-i18n="bestsellers">الأكثر مبيعاً</span><small>BESTSELLERS</small></a>
+      <a href="#/shop?deal=1" data-nav="sale"><span data-i18n="saleMenu">عروض وخصومات</span><small>25%–50% OFF</small></a>
     </nav>
   </aside>
   <main id="view" tabindex="-1">
-    <p class="loading">جاري فتح المتجر…</p>
+    <p class="loading" data-i18n="loading">جاري فتح المتجر…</p>
   </main>
   <footer class="footer">
-    <nav class="fine" aria-label="روابط أسفل الصفحة">
-      <a href="#/about">عن مسلم</a>
-      <a href="#/tryon">التجربة الحية</a>
-      <a href="#/shipping">الشحن</a>
-      <a href="#/track">تتبّع الطلب</a>
-      <a href="#/contact">تواصل</a>
+    <nav class="fine" data-i18n-aria="footerNav" aria-label="روابط أسفل الصفحة">
+      <a href="#/about" data-i18n="about">عن مسلم</a>
+      <a href="#/tryon" data-i18n="tryon">التجربة الحية</a>
+      <a href="#/shipping" data-i18n="shipping">الشحن</a>
+      <a href="#/track" data-i18n="track">تتبّع الطلب</a>
+      <a href="#/contact" data-i18n="contact">تواصل</a>
     </nav>
     <p>© 2026 Muslem Optics</p>
   </footer>
-  <dialog id="search" class="search" aria-label="بحث في التشكيلة">
+  <dialog id="search" class="search" data-i18n-aria="searchLabel" aria-label="بحث في التشكيلة">
     <form class="search-bar" id="search-form">
-      <input id="q" type="search" placeholder="ابحث عن إطار، لون، أو ماركة" autocomplete="off" enterkeyhint="search">
-      <button type="button" id="close-search" aria-label="إغلاق">×</button>
+      <input id="q" type="search" data-i18n-placeholder="searchPh" placeholder="ابحث عن إطار، لون، أو ماركة" autocomplete="off" enterkeyhint="search">
+      <button type="button" id="close-search" data-i18n-aria="close" aria-label="إغلاق">×</button>
     </form>
     <div id="search-results"></div>
   </dialog>
   <dialog id="buy-choice" class="buy-choice" aria-labelledby="buy-choice-title">
-    <button type="button" class="buy-close" id="buy-close" aria-label="إغلاق">×</button>
-    <p class="kicker">شراء</p>
-    <h2 id="buy-choice-title">كيف تريد الإطار؟</h2>
+    <button type="button" class="buy-close" id="buy-close" data-i18n-aria="close" aria-label="إغلاق">×</button>
+    <p class="kicker" data-i18n="buy">شراء</p>
+    <h2 id="buy-choice-title" data-i18n="buyTitle">كيف تريد الإطار؟</h2>
     <p id="buy-choice-name" class="buy-name"></p>
     <div class="choice-actions">
-      <button type="button" class="btn block" id="buy-plain">بدون عدسات</button>
-      <button type="button" class="btn ghost block" id="buy-rx">بعدسات طبية</button>
+      <button type="button" class="btn block" id="buy-plain" data-i18n="buyPlain">بدون عدسات</button>
+      <button type="button" class="btn ghost block" id="buy-rx" data-i18n="buyRx">بعدسات طبية</button>
     </div>
     <div id="buy-wa" class="buy-wa" hidden>
-      <p>أرسل الكشف والعدسة المحددة مباشرة إلى المحل.</p>
-      <a class="btn wa block" id="buy-wa-link" href="https://wa.me/201148005679" target="_blank" rel="noopener">واتساب</a>
+      <p data-i18n="buyRxHelp">أرسل الكشف والعدسة المحددة مباشرة إلى المحل.</p>
+      <a class="btn wa block" id="buy-wa-link" href="https://wa.me/201148005679" target="_blank" rel="noopener" data-i18n="whatsapp">واتساب</a>
     </div>
   </dialog>
   <div id="toast" class="toast" hidden role="status"></div>
