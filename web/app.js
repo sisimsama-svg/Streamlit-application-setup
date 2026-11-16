@@ -212,7 +212,7 @@ function stockLabel(stock) {
 
 function brandLabel(brand) {
   const value = String(brand || "");
-  if (value === "نظارات مسلم" || value === "مسلم" || /^(moslem|muslam|muslem)$/i.test(value)) return "Muslem";
+  if (value === "نظارات مسلم" || value === "مسلم" || /^(moslem|muslam|muslem)$/i.test(value)) return "Muslim";
   return term(value);
 }
 

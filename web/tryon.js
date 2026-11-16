@@ -232,7 +232,7 @@ export function mountTryOn(root, options) {
     const product = current();
     if (!product) return;
     const house = /^(نظارات مسلم|مسلم|moslem|muslam|muslem)$/i.test(String(product.brand || ""));
-    root.querySelector("#try-brand").textContent = house ? "Muslem" : term(product.brand);
+    root.querySelector("#try-brand").textContent = house ? "Muslim" : term(product.brand);
     root.querySelector("#try-name").textContent = productName(product.name);
     const discount = product.old_price > product.price;
     root.querySelector("#try-price").innerHTML = `${options.money(product.price)}${discount ? `<s>${options.money(product.old_price)}</s>` : ""}`;
