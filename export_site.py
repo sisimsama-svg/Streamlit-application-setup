@@ -30,6 +30,7 @@ def main() -> None:
     if index.is_file():
         shutil.copy2(index, WEB / "404.html")
     (WEB / ".nojekyll").write_text("", encoding="ascii")
+    (WEB / "CNAME").write_text("muslimoptics.com\n", encoding="ascii")
 
 
 if __name__ == "__main__":
