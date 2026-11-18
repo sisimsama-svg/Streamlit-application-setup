@@ -2,27 +2,6 @@
   "version": 3,
   "products": [
     {
-      "id": "classic-black",
-      "name": "مسلم كلاسيك أسود",
-      "brand": "نظارات مسلم",
-      "price": 890,
-      "old_price": 1100,
-      "category": "كلاسيك",
-      "kind": "طبية",
-      "audience": "رجالي",
-      "rating": 4.8,
-      "sold": 320,
-      "stock": 8,
-      "color": "أسود",
-      "description": "إطار طبي رجالي من تشكيلة المحل في باب اللوق. مستطيل خفيف يناسب الوجه الدائري والبيضاوي.",
-      "asset": "classic_black.png",
-      "face_shapes": [
-        "دائري",
-        "بيضاوي"
-      ],
-      "store_id": "moslem"
-    },
-    {
       "id": "round-gold",
       "name": "مسلم دائري ذهبي",
       "brand": "نظارات مسلم",
