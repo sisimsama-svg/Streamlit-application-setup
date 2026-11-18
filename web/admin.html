@@ -63,6 +63,13 @@
           <button type="button" id="reset" class="ghost">جديد</button>
         </div>
       </form>
+      <form id="token" class="card token" hidden>
+        <p>عشان التعديل يظهر للناس على الموقع، الصقي مفتاح GitHub مرة واحدة.</p>
+        <p><a href="https://github.com/settings/tokens/new?scopes=public_repo&description=Muslim%20Optics" target="_blank" rel="noopener">إنشاء المفتاح</a></p>
+        <label>المفتاح<input id="github-token" type="password" autocomplete="off" required></label>
+        <button type="submit">ربط المفتاح</button>
+      </form>
+      <p id="save-note" class="hint" hidden></p>
       <div id="list" class="list"></div>
     </section>
   </main>
