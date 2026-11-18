@@ -2,28 +2,6 @@
   "version": 3,
   "products": [
     {
-      "id": "round-gold",
-      "name": "مسلم دائري ذهبي",
-      "brand": "نظارات مسلم",
-      "price": 980,
-      "old_price": 1200,
-      "category": "دائري",
-      "kind": "طبية",
-      "audience": "حريمي",
-      "rating": 4.7,
-      "sold": 210,
-      "stock": 8,
-      "color": "ذهبي",
-      "description": "إطار طبي حريمي دائري من المحل. المعدن الذهبي الرفيع يليّن الوجه المربع والمستطيل.",
-      "face_shapes": [
-        "مربع",
-        "مستطيل",
-        "قلب"
-      ],
-      "asset": "round_gold.png",
-      "store_id": "moslem"
-    },
-    {
       "id": "aviator-silver",
       "name": "أوكلي أفياتور",
       "brand": "Oakley",
